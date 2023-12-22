@@ -1,8 +1,17 @@
-# Container Build Kaniko
+# GitLab CI/CD Components
+![CI/CD](https://gitlab.com/hegerdes/gitlab-actions/badges/main/pipeline.svg)
+![Release](https://gitlab.com/hegerdes/gitlab-actions/-/badges/release.svg)
 
-## Usage
+This repo contains a collection of different [GotLab CI/CD Components](https://about.gitlab.com/blog/2023/12/21/introducing-the-gitlab-ci-cd-catalog-beta/).
 
-Use this component to enable container scanning in your project.
+Currently suporrted are:
+ * [Container Build: Kaniko](https://gitlab.com/hegerdes/gitlab-actions#container-build-kaniko)
+
+## Container Build: Kaniko
+
+### Usage
+
+Use this component to build container images in your project without the need of a privileged Docker runner. It uses Googles [kaniko](https://github.com/GoogleContainerTools/kaniko) project to allow safe image builds in Docker or Kubernetes. It automataticly adds metadata labels to the image for easy tracking when the image is deployed.
 You should add this component to an existing `.gitlab-ci.yml` file by using the `include:`
 keyword.
 
@@ -11,9 +20,9 @@ include:
   - component: gitlab.com/hegerdes/gitlab-actions/container-build@<VERSION>
 ```
 
-where `<VERSION>` is the latest released tag or `main`.
+where `<VERSION>` is the latest released tag or `main`. This will add a `container_build` job to the pipeline.  
+*NOTE:* By default the latest version of kaniko is used. For a more predictable outcome you should pin the version to a specific tag via the `build_image` input.
 
-This will add a `container_build` job to the pipeline.
 
 The template should work without modifications but you can customize the template settings.
 ### Inputs
