@@ -1,7 +1,7 @@
 spec:
   inputs:
     stage:
-      default: test
+      default: build
     build_image:
       default: gcr.io/kaniko-project/executor:debug
     force_run:
@@ -14,7 +14,7 @@ spec:
       type: boolean
       default: false
     image_tag:
-        default: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
+        default: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG
     context:
         default: $CI_PROJECT_DIR
     dockerfile:
@@ -27,7 +27,7 @@ spec:
         default: $CI_PROJECT_URL
     version:
         default: $CI_COMMIT_REF_NAME
-    dokumentation_url:
+    documentation_url:
         default: $CI_PROJECT_URL
     description:
         default: $CI_PROJECT_DESCRIPTION
@@ -57,7 +57,7 @@ container_build:
     SOURCE_URL: "$[[ inputs.source_url ]]"
     PROJECT_URL: "$[[ inputs.project_url ]]"
     VERSION: "$[[ inputs.version ]]"
-    DOKUMENTATION_URL: "$[[ inputs.dokumentation_url ]]"
+    documentation_url: "$[[ inputs.documentation_url ]]"
     DESCRIPTION: "$[[ inputs.description ]]"
     VENDOR: "$[[ inputs.vendor ]]"
     LICENSE: "$[[ inputs.license ]]"
@@ -70,7 +70,7 @@ container_build:
       mkdir -p /kaniko/.docker && mkdir build-artifacts
     - |
       echo "Setting variables" > /dev/null
-      if [ "${KANIKO_USE_CACHE}" = "true" ]; then export KANIKO_CACHE_ARGS=$KANIKO_DEFAULT_CACHE_ARGS; fi
+      if [ "${KANIKO_USE_CACHE}" = "true" ]; then export KANIKO_EXTRA_ARGS_INTERNAL=${KANIKO_DEFAULT_CACHE_ARGS} ${KANIKO_EXTRA_ARGS_INTERNAL}; fi
       if [ "${KANIKO_PUSH}" = "false" ]; then export KANIKO_EXTRA_ARGS_INTERNAL="--no-push ${KANIKO_EXTRA_ARGS_INTERNAL}"; fi
       if [ ! -z ${KANIKO_EXTRA_BUILD_DST+x} ]; then KANIKO_EXTRA_ARGS_INTERNAL="--destination ${KANIKO_EXTRA_BUILD_DST} ${KANIKO_EXTRA_ARGS_INTERNAL}"; fi
       echo "Building ${BUILD_IMAGE_TAG}..."
@@ -83,14 +83,14 @@ container_build:
       --skip-unused-stages \
       --log-timestamp=true \
       --registry-mirror mirror.gcr.io \
-      --dockerfile $DOCKERFILE $KANIKO_CACHE_ARGS \
+      --dockerfile $DOCKERFILE \
       --build-arg COMMIT_HASH=$CI_COMMIT_SHORT_SHA \
       --build-arg COMMIT_TAG=$CI_COMMIT_REF_NAME \
       --build-arg BUILD_ENV=$BUILD_ENV \
       --label org.opencontainers.image.created="$(date -D FMT=minutes)" \
       --label org.opencontainers.image.authors="${AUTHORS}" \
       --label org.opencontainers.image.url="${PROJECT_URL}" \
-      --label org.opencontainers.image.documentation="${DOKUMENTATION_URL}" \
+      --label org.opencontainers.image.documentation="${documentation_url}" \
       --label org.opencontainers.image.source="${SOURCE_URL}" \
       --label org.opencontainers.image.version="${VERSION}" \
       --label org.opencontainers.image.revision="${CI_COMMIT_SHORT_SHA}" \

@@ -21,7 +21,6 @@ include:
 sast:
   stage: test
 
-
 # If we are tagging a release with a specific convention ("v" + number) and all
 # previous checks succeeded, we proceed with creating a release automatically.
 create-release:
