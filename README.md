@@ -21,7 +21,7 @@ The template should work without modifications but you can customize the templat
 | Input | Default value | Description |
 | ----- | ------------- | ----------- |
 | `stage` | `test`      | The stage where you want the job to be added |
-| `analyzer_image` | `$CI_TEMPLATE_REGISTRY_HOST/security-products/container-scanning:5` | The Docker image of the analyzer |
+| `build_image` | `$CI_TEMPLATE_REGISTRY_HOST/security-products/container-scanning:5` | The Docker image of the analyzer |
 | `force_run` | `false` | When set to `true` it always adds the job even if `$CONTAINER_SCANNING_DISABLED` is set |
 
 ### Variables

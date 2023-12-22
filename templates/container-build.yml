@@ -42,7 +42,7 @@ spec:
 container_build:
   stage: $[[ inputs.stage ]]
   image:
-    name: "$[[ inputs.analyzer_image ]]"
+    name: "$[[ inputs.build_image ]]"
     entrypoint: [""]
   variables:
     #More Information on Kaniko Caching: https://cloud.google.com/build/docs/kaniko-cache\n\t
