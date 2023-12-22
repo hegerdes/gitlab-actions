@@ -112,8 +112,7 @@ container_build:
 
     # Add the job to merge request pipelines if there's an open merge request.
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event" &&
-          $CI_GITLAB_FIPS_MODE == "true" &&
-          "$[[ inputs.analyzer_image ]]" !~ /-(fips|ubi)\z/'
+          $CI_GITLAB_FIPS_MODE == "true"'
       variables:
         CS_IMAGE_SUFFIX: -fips
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
@@ -123,9 +122,4 @@ container_build:
       when: never
 
     # Add the job to branch pipelines.
-    - if: '$CI_COMMIT_BRANCH &&
-          $CI_GITLAB_FIPS_MODE == "true" &&
-          "$[[ inputs.analyzer_image ]]" !~ /-(fips|ubi)\z/'
-      variables:
-        CS_IMAGE_SUFFIX: -fips
     - if: $CI_COMMIT_BRANCH

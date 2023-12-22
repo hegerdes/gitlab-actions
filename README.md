@@ -8,7 +8,7 @@ keyword.
 
 ```yaml
 include:
-  - component: gitlab.com/hegerdes/container-build-kaniko/container-build@<VERSION>
+  - component: gitlab.com/hegerdes/gitlab-actions/container-build@<VERSION>
 ```
 
 where `<VERSION>` is the latest released tag or `main`.
