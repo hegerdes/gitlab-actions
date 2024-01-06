@@ -1,6 +1,6 @@
 {
   "name": "gitlab-actions",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "![CI/CD](https://gitlab.com/hegerdes/gitlab-actions/badges/main/pipeline.svg) ![Release](https://gitlab.com/hegerdes/gitlab-actions/-/badges/release.svg)",
   "main": "index.js",
   "scripts": {

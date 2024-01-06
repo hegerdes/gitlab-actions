@@ -6,6 +6,7 @@ This repo contains a collection of different [GotLab CI/CD Components](https://a
 
 Currently suporrted are:
  * [Container Build: Kaniko](https://gitlab.com/hegerdes/gitlab-actions#container-build-kaniko)
+ * [Code Quality: pre-commit](https://gitlab.com/hegerdes/gitlab-actions#Code-Quality:-pre-commit)
 
 ## Container Build: Kaniko
 
