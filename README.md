@@ -31,7 +31,7 @@ The template should work without modifications but you can customize the templat
 | ----- | ------------- | ----------- |
 | `stage` | `build`      | The stage where you want the job to be added |
 | `build_image` | `gcr.io/kaniko-project/executor:debug` | The Docker image of kaniko |
-| `force_run` | `false` | When set to `true` it always adds the job even if `$CONTAINER_SCANNING_DISABLED` is set |
+| `force_run` | `false` | When set to `true` it always adds the job |
 | `push` | `true` | When set to `true` the image will be pushed to the default registry. Set to `false` to only build without pushing the image. |
 | `kaniko_use_cache` | `false` | When set to `true` kaniko will push build cache layers to the registry. Currently only the gitlab registry is supported. |
 | `image_tag` | `$CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG` | The name/path of the image to build. |

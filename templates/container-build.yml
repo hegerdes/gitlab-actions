@@ -1,8 +1,10 @@
 spec:
   inputs:
     stage:
+      type: string
       default: build
     build_image:
+      type: string
       default: gcr.io/kaniko-project/executor:debug
     force_run:
       type: boolean
@@ -14,29 +16,41 @@ spec:
       type: boolean
       default: false
     image_tag:
-        default: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG
+      type: string
+      default: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG
     context:
-        default: $CI_PROJECT_DIR
+      type: string
+      default: $CI_PROJECT_DIR
     dockerfile:
-        default: $CI_PROJECT_DIR/Dockerfile
+      type: string
+      default: $CI_PROJECT_DIR/Dockerfile
     authors:
-        default: $CI_COMMIT_AUTHOR
+      type: string
+      default: $CI_COMMIT_AUTHOR
     source_url:
-        default: $CI_PROJECT_URL
+      type: string
+      default: $CI_PROJECT_URL
     project_url:
-        default: $CI_PROJECT_URL
+      type: string
+      default: $CI_PROJECT_URL
     version:
-        default: $CI_COMMIT_REF_NAME
+      type: string
+      default: $CI_COMMIT_REF_NAME
     documentation_url:
-        default: $CI_PROJECT_URL
+      type: string
+      default: $CI_PROJECT_URL
     description:
-        default: $CI_PROJECT_DESCRIPTION
+      type: string
+      default: $CI_PROJECT_DESCRIPTION
     base_img_name:
-        default: UNKNOWN
+      type: string
+      default: UNKNOWN
     vendor:
-        default: UNKNOWN
+      type: string
+      default: UNKNOWN
     license:
-        default: UNKNOWN
+      type: string
+      default: UNKNOWN
 ---
 
 container_build:
