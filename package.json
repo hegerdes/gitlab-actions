@@ -1,0 +1,12 @@
+{
+  "name": "gitlab-actions",
+  "version": "1.0.0",
+  "description": "![CI/CD](https://gitlab.com/hegerdes/gitlab-actions/badges/main/pipeline.svg) ![Release](https://gitlab.com/hegerdes/gitlab-actions/-/badges/release.svg)",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": ["GitLab CI/CD"],
+  "author": "hegerdes",
+  "license": "BSD 2-Clause License"
+}
