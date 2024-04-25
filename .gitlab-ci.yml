@@ -10,11 +10,17 @@ stages:
   - build
   - release
 
+sast:
+  stage: test
+
 include:
   - template: Security/SAST.gitlab-ci.yml
-  - component: $CI_SERVER_HOST/$CI_PROJECT_PATH/container-build@$CI_COMMIT_SHA
+  - component: $CI_SERVER_HOST/$CI_PROJECT_PATH/kaniko-build@$CI_COMMIT_SHA
     inputs:
-      force_run: true
+      context: $CI_PROJECT_DIR/tests
+      dockerfile: $CI_PROJECT_DIR/tests/Dockerfile
+  - component: $CI_SERVER_HOST/$CI_PROJECT_PATH/buildah-build@$CI_COMMIT_SHA
+    inputs:
       context: $CI_PROJECT_DIR/tests
       dockerfile: $CI_PROJECT_DIR/tests/Dockerfile
   - component: $CI_SERVER_HOST/$CI_PROJECT_PATH/pre-commit@$CI_COMMIT_SHA
@@ -22,9 +28,6 @@ include:
       force_run: true
       autofix: true
       access_token: $PRE_COMMIT_ACCESS_TOKEN
-
-sast:
-  stage: test
 
 # If we are tagging a release with a specific convention ("v" + number) and all
 # previous checks succeeded, we proceed with creating a release automatically.
