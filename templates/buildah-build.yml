@@ -1,0 +1,184 @@
+spec:
+  inputs:
+    stage:
+      type: string
+      default: build
+    build_image:
+      type: string
+      default: quay.io/buildah/stable:latest
+    push:
+      type: boolean
+      default: true
+    cache:
+      type: boolean
+      default: false
+    image_tags:
+      type: array
+      default:
+        - "$CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG"
+    context:
+      type: string
+      default: $CI_PROJECT_DIR
+    dockerfile:
+      type: string
+      default: $CI_PROJECT_DIR/Dockerfile
+    authors:
+      type: string
+      default: $CI_COMMIT_AUTHOR
+    source_url:
+      type: string
+      default: $CI_PROJECT_URL
+    project_url:
+      type: string
+      default: $CI_PROJECT_URL
+    version:
+      type: string
+      default: $CI_COMMIT_REF_NAME
+    documentation_url:
+      type: string
+      default: $CI_PROJECT_URL
+    description:
+      type: string
+      default: $CI_PROJECT_DESCRIPTION
+    base_img_name:
+      type: string
+      default: UNKNOWN
+    vendor:
+      type: string
+      default: UNKNOWN
+    license:
+      type: string
+      default: UNKNOWN
+    rules:
+      type: array
+      default:
+        # Add the job to merge request pipelines if there's an open merge request.
+        - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+        # Don't add it to a *branch* pipeline if it's already in a merge request pipeline.
+        - if: $CI_OPEN_MERGE_REQUESTS
+          when: never
+        # Add the job to branch pipelines.
+        - if: $CI_COMMIT_BRANCH
+---
+buildah_build:
+  stage: $[[ inputs.stage ]]
+  image:
+    name: "$[[ inputs.build_image ]]"
+    entrypoint: [""]
+  variables:
+    STORAGE_DRIVER: vfs
+    BUILDAH_ISOLATION: chroot
+    CONTAINER_BUILD_DEFAULT_CACHE_ARGS: ""
+    CONTAINER_BUILD_PUSH: "$[[ inputs.push ]]"
+    CONTAINER_BUILD_USE_CACHE: "$[[ inputs.cache ]]"
+    CONTEXT: "$[[ inputs.context ]]"
+    DOCKERFILE: "$[[ inputs.dockerfile ]]"
+    AUTHORS: "$[[ inputs.authors ]]"
+    SOURCE_URL: "$[[ inputs.source_url ]]"
+    PROJECT_URL: "$[[ inputs.project_url ]]"
+    VERSION: "$[[ inputs.version ]]"
+    DOCUMENTATION_URL: "$[[ inputs.documentation_url ]]"
+    DESCRIPTION: "$[[ inputs.description ]]"
+    VENDOR: "$[[ inputs.vendor ]]"
+    LICENSE: "$[[ inputs.license ]]"
+    BASE_IMG_NAME: "$[[ inputs.base_img_name ]]"
+  script:
+    - echo "Using $(/usr/bin/buildah version)"
+    - |
+      echo "Setting up job..." > /dev/null
+      if [ ! -z ${CONTAINER_BUILD_EXTRA_ARGS+x} ]; then CONTAINER_BUILD_EXTRA_ARGS="${CONTAINER_BUILD_EXTRA_ARGS}"; fi
+      mkdir -p {/kaniko/.docker,build-artifacts,~/.docker}
+      if [ ! -z "${VAR}" ]; then echo $DOCKER_AUTH_CONFIG > ~/.docker/config.json; fi
+    - |
+      # Preparing image tags
+      export IMAGE_TAGS="$[[ inputs.image_tags ]]"
+
+      # Remove the brackets and then split the string by commas
+      IMAGE_TAGS="${IMAGE_TAGS#[}"
+      IMAGE_TAGS="${IMAGE_TAGS%]}"
+
+      IFS=","
+      for IMAGE_TAG in ${IMAGE_TAGS}; do
+          # Ensure to strip any whitespace and send a curl request to each URL
+          CONTAINER_BUILD_IAMGE_TAGS="${CONTAINER_BUILD_IAMGE_TAGS}-t $(echo $IMAGE_TAG | xargs) "
+      done
+
+    - |
+      echo "Building ${CONTAINER_BUILD_IAMGE_TAGS}..."
+      eval $(echo "buildah build "${CONTAINER_BUILD_IAMGE_TAGS}" \
+      --file "${DOCKERFILE}" --layers $CONTAINER_BUILD_EXTRA_ARGS \
+      --sbom trivy --sbom-output build-artifacts/sbom.json \
+      --build-arg COMMIT_HASH=\"${CI_COMMIT_SHORT_SHA}\" \
+      --build-arg COMMIT_TAG=\"${CI_COMMIT_REF_NAME}\" \
+      --build-arg BUILD_ENV=\"${BUILD_ENV:-default}\" \
+      --label org.opencontainers.image.created=\"$(date --iso-8601=minutes)\" \
+      --label org.opencontainers.image.url=\"${PROJECT_URL}\" \
+      --label org.opencontainers.image.documentation=\"${DOCUMENTATION_URL}\" \
+      --label org.opencontainers.image.source=\"${SOURCE_URL}\" \
+      --label org.opencontainers.image.authors=\"${AUTHORS}\" \
+      --label org.opencontainers.image.version=\"${VERSION}\" \
+      --label org.opencontainers.image.revision=\"${CI_COMMIT_SHORT_SHA}\" \
+      --label org.opencontainers.image.vendor=\"${VENDOR}\" \
+      --label org.opencontainers.image.licenses=\"${LICENSE}\" \
+      --label org.opencontainers.image.title=\"$CI_PROJECT_NAME\" \
+      --label org.opencontainers.image.description=\"$DESCRIPTION\" \
+      --label org.opencontainers.image.base.name=\"${BASE_IMG_NAME}\" \
+      \"${CONTEXT}\" ")
+    - |
+      if [ "${CONTAINER_BUILD_PUSH}" = "true" ]; then
+        buildah login -u "$CI_REGISTRY_USER" --password $CI_REGISTRY_PASSWORD $CI_REGISTRY
+        for IMAGE_TAG in ${IMAGE_TAGS}; do
+            echo "Pushing $(echo $IMAGE_TAG | xargs)"
+            if [ -f "~/.docker/config.json" ]; then
+              buildah push --authfile ~/.docker/config.json $(echo $IMAGE_TAG | xargs)
+            else
+              buildah push $(echo $IMAGE_TAG | xargs)
+            fi
+        done
+      else
+        echo "Skipping push!"
+      fi
+  artifacts:
+    name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME"
+    paths:
+      - build-artifacts/**
+    expire_in: 1 week
+    when: always
+  rules: $[[ inputs.rules ]]
+#   before_script:
+#     # Login for Artifactory
+#     - mkdir -p ~/.docker && echo $DOCKER_AUTH_CONFIG > ~/.docker/config.json
+
+#   script:
+#     - buildah bud --authfile ~/.docker/config.json -t ${FQ_IMAGE_NAME_JOB} --build-arg http_proxy="${DATAPORT_PROXY}" --build-arg https_proxy="${DATAPORT_PROXY}" ./CONTAINER_testdriver_job
+#     - buildah bud --authfile ~/.docker/config.json -t ${FQ_IMAGE_NAME_SERVER} --build-arg http_proxy="${DATAPORT_PROXY}" --build-arg https_proxy="${DATAPORT_PROXY}" ./CONTAINER_testdriver_server
+#     - buildah push --authfile ~/.docker/config.json ${FQ_IMAGE_NAME_JOB}
+#     - buildah push --authfile ~/.docker/config.json ${FQ_IMAGE_NAME_SERVER}
+#     - buildah push --authfile ~/.docker/config.json ${FQ_IMAGE_NAME_JOB} ${FQ_IMAGE_NAME_JOB_LATEST}
+#     - buildah push --authfile ~/.docker/config.json ${FQ_IMAGE_NAME_SERVER} ${FQ_IMAGE_NAME_SERVER_LATEST}
+
+#   script:
+#     - export SCAN_GUN="${FQ_IMAGE_NAME_JOB}"
+#     - echo $SCAN_GUN
+#     - trivy image --exit-code 0 --severity HIGH,CRITICAL --no-progress --ignore-unfixed $SCAN_GUN
+#     - export SCAN_GUN="${FQ_IMAGE_NAME_SERVER}"
+#     - echo $SCAN_GUN
+#     - trivy image --exit-code 0 --severity HIGH,CRITICAL --no-progress --ignore-unfixed $SCAN_GUN
+
+# dockr-push-release:
+#   variables:
+#     repository: "${DOCKER_REPO_URL}/release/${CI_PROJECT_NAME}"
+#     tag: ${CI_COMMIT_TAG}
+#     FQ_IMAGE_NAME_JOB: "${DOCKER_REPO_URL}/release/test-driver-python-job:${CI_COMMIT_TAG}"
+#     FQ_IMAGE_NAME_SERVER: "${DOCKER_REPO_URL}/release/test-driver-python-server:${CI_COMMIT_TAG}"
+#     FQ_IMAGE_NAME_JOB_LATEST: "${DOCKER_REPO_URL}/release/test-driver-python-job:latest"
+#     FQ_IMAGE_NAME_SERVER_LATEST: "${DOCKER_REPO_URL}/release/test-driver-python-server:latest"
+#   extends:
+#     - build-containers
+#   script:
+#     - buildah bud -t ${FQ_IMAGE_NAME_JOB} --build-arg http_proxy="${DATAPORT_PROXY}" --build-arg https_proxy="${DATAPORT_PROXY}" ./CONTAINER_testdriver_job
+#     - buildah bud -t ${FQ_IMAGE_NAME_SERVER} --build-arg http_proxy="${DATAPORT_PROXY}" --build-arg https_proxy="${DATAPORT_PROXY}" ./CONTAINER_testdriver_server
+#     - buildah push --authfile ~/.docker/config.json ${FQ_IMAGE_NAME_JOB}
+#     - buildah push --authfile ~/.docker/config.json ${FQ_IMAGE_NAME_SERVER}
+#     - buildah push --authfile ~/.docker/config.json ${FQ_IMAGE_NAME_JOB} ${FQ_IMAGE_NAME_JOB_LATEST}
+#     - buildah push --authfile ~/.docker/config.json ${FQ_IMAGE_NAME_SERVER} ${FQ_IMAGE_NAME_SERVER_LATEST}

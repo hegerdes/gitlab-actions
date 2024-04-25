@@ -1,0 +1,141 @@
+spec:
+  inputs:
+    stage:
+      type: string
+      default: build
+    build_image:
+      type: string
+      default: gcr.io/kaniko-project/executor:debug
+    push:
+      type: boolean
+      default: true
+    cache:
+      type: boolean
+      default: false
+    image_tags:
+      type: array
+      default:
+        - "$CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG"
+    context:
+      type: string
+      default: $CI_PROJECT_DIR
+    dockerfile:
+      type: string
+      default: $CI_PROJECT_DIR/Dockerfile
+    authors:
+      type: string
+      default: $CI_COMMIT_AUTHOR
+    source_url:
+      type: string
+      default: $CI_PROJECT_URL
+    project_url:
+      type: string
+      default: $CI_PROJECT_URL
+    version:
+      type: string
+      default: $CI_COMMIT_REF_NAME
+    documentation_url:
+      type: string
+      default: $CI_PROJECT_URL
+    description:
+      type: string
+      default: $CI_PROJECT_DESCRIPTION
+    base_img_name:
+      type: string
+      default: UNKNOWN
+    vendor:
+      type: string
+      default: UNKNOWN
+    license:
+      type: string
+      default: UNKNOWN
+    rules:
+      type: array
+      default:
+        # Add the job to merge request pipelines if there's an open merge request.
+        - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+        # Don't add it to a *branch* pipeline if it's already in a merge request pipeline.
+        - if: $CI_OPEN_MERGE_REQUESTS
+          when: never
+        # Add the job to branch pipelines.
+        - if: $CI_COMMIT_BRANCH
+---
+kaniko_build:
+  stage: $[[ inputs.stage ]]
+  image:
+    name: "$[[ inputs.build_image ]]"
+    entrypoint: [""]
+  variables:
+    #More Information on Kaniko Caching: https://cloud.google.com/build/docs/kaniko-cache\n\t
+    #Set to 2 weeks
+    CONTAINER_BUILD_DEFAULT_CACHE_ARGS: --cache=true --cache-copy-layers=false --cache-ttl=336h
+    CONTAINER_BUILD_PUSH: "$[[ inputs.push ]]"
+    CONTAINER_BUILD_USE_CACHE: "$[[ inputs.cache ]]"
+    CONTEXT: "$[[ inputs.context ]]"
+    DOCKERFILE: "$[[ inputs.dockerfile ]]"
+    AUTHORS: "$[[ inputs.authors ]]"
+    SOURCE_URL: "$[[ inputs.source_url ]]"
+    PROJECT_URL: "$[[ inputs.project_url ]]"
+    VERSION: "$[[ inputs.version ]]"
+    DOCUMENTATION_URL: "$[[ inputs.documentation_url ]]"
+    DESCRIPTION: "$[[ inputs.description ]]"
+    VENDOR: "$[[ inputs.vendor ]]"
+    LICENSE: "$[[ inputs.license ]]"
+    BASE_IMG_NAME: "$[[ inputs.base_img_name ]]"
+  script:
+    - echo "Using $(/kaniko/executor version)"
+    - |
+      echo "Setting up job..." > /dev/null
+      mkdir -p {/kaniko/.docker,build-artifacts,~/.docker}
+    - |
+      echo "Setting variables" > /dev/null
+      if [ "${CONTAINER_BUILD_USE_CACHE}" = "true" ]; then export CONTAINER_BUILD_EXTRA_ARGS=${CONTAINER_BUILD_DEFAULT_CACHE_ARGS} ${CONTAINER_BUILD_EXTRA_ARGS}; fi
+      if [ "${CONTAINER_BUILD_PUSH}" = "false" ]; then export CONTAINER_BUILD_EXTRA_ARGS="--no-push ${CONTAINER_BUILD_EXTRA_ARGS}"; fi
+      if [ ! -z ${KANIKO_EXTRA_BUILD_DST+x} ]; then CONTAINER_BUILD_EXTRA_ARGS="--destination ${KANIKO_EXTRA_BUILD_DST} ${CONTAINER_BUILD_EXTRA_ARGS}"; fi
+
+      export IMAGE_TAGS="$[[ inputs.image_tags ]]"
+      IMAGE_TAGS="${IMAGE_TAGS#[}"
+      IMAGE_TAGS="${IMAGE_TAGS%]}"
+
+      # # Read the cleaned-up string into an array, splitting by commas
+      IFS=","
+      for IMAGE_TAG in ${IMAGE_TAGS}; do
+          # Ensure to strip any whitespace and send a curl request to each URL
+          echo $IMAGE_TAG
+          CONTAINER_BUILD_IAMGE_TAGS="${CONTAINER_BUILD_IAMGE_TAGS}--destination $(echo $IMAGE_TAG | xargs) "
+      done
+
+      echo "Building ${CONTAINER_BUILD_IAMGE_TAGS}..."
+      echo "Using context \"${CONTEXT}\" with dockerfile \"${DOCKERFILE}\""
+    - |
+      echo "Building image with kaniko..."
+      if [ ! -z ${CONTAINER_BUILD_EXTRA_ARGS+x} ]; then echo "Using extra build-args=${CONTAINER_BUILD_EXTRA_ARGS}"; fi
+      eval $(echo "/kaniko/executor \
+      --context $CONTEXT \
+      --skip-unused-stages \
+      --log-timestamp=true \
+      --registry-mirror mirror.gcr.io \
+      --dockerfile $DOCKERFILE \
+      --build-arg COMMIT_HASH=\"${CI_COMMIT_SHORT_SHA}\" \
+      --build-arg COMMIT_TAG=\"${CI_COMMIT_REF_NAME}\" \
+      --build-arg BUILD_ENV=$BUILD_ENV \
+      --label org.opencontainers.image.created=\"$(date -D FMT=minutes)\" \
+      --label org.opencontainers.image.authors=\"${AUTHORS}\" \
+      --label org.opencontainers.image.url=\"${PROJECT_URL}\" \
+      --label org.opencontainers.image.documentation=\"${DOCUMENTATION_URL}\" \
+      --label org.opencontainers.image.source=\"${SOURCE_URL}\" \
+      --label org.opencontainers.image.version=\"${VERSION}\" \
+      --label org.opencontainers.image.revision=\"${CI_COMMIT_SHORT_SHA}\" \
+      --label org.opencontainers.image.vendor=\"${VENDOR}\" \
+      --label org.opencontainers.image.licenses=\"${LICENSE}\" \
+      --label org.opencontainers.image.title=\"$CI_PROJECT_NAME\" \
+      --label org.opencontainers.image.description=\"$DESCRIPTION\" \
+      --label org.opencontainers.image.base.name=\"${BASE_IMG_NAME}\" \
+      $CONTAINER_BUILD_IAMGE_TAGS $CONTAINER_BUILD_EXTRA_ARGS")
+  artifacts:
+    name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME"
+    paths:
+      - build-artifacts/**
+    expire_in: 1 week
+    when: always
+  rules: $[[ inputs.rules ]]
