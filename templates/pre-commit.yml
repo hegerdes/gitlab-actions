@@ -1,9 +1,12 @@
 spec:
   inputs:
+    as_job:
+      type: string
+      default: pre-commit
     stage:
       default: .pre
     image:
-      default: registry.gitlab.com/yesolutions/docker-pre-commit
+      default: python:3.12-slim
     force_run:
       type: boolean
       default: false
@@ -16,17 +19,27 @@ spec:
     deduplicate_mr_and_branch:
       type: boolean
       default: true
-
 ---
-pre-commit:
-    stage: "$[[ inputs.stage ]]"
-    image: "$[[ inputs.image ]]"
-    variables:
-      PRE_COMMIT_AUTO_FIX: "$[[ inputs.autofix ]]"
-      PRE_COMMIT_DEDUPLICATE_MR_AND_BRANCH: "$[[ inputs.deduplicate_mr_and_branch ]]"
-      PRE_COMMIT_ACCESS_TOKEN: "$[[ inputs.access_token ]]"
-    script:
+$[[ inputs.as_job ]]:
+  stage: "$[[ inputs.stage ]]"
+  image: "$[[ inputs.image ]]"
+  variables:
+    PRE_COMMIT_AUTO_FIX: "$[[ inputs.autofix ]]"
+    PRE_COMMIT_DEDUPLICATE_MR_AND_BRANCH: "$[[ inputs.deduplicate_mr_and_branch ]]"
+    PRE_COMMIT_ACCESS_TOKEN: "$[[ inputs.access_token ]]"
+  script:
     - echo "Using image $[[ inputs.image ]] with ${COMMIT_TAG}@${COMMIT_HASH}"
+    - |
+      # Ensure programms are installed
+      if ! command -v git &> /dev/null; then
+        echo "Installing git..."
+        apt-get update > /dev/null
+        apt-get install git --yes --no-install-recommends > /dev/null 2>&1
+      fi
+      if ! command -v pre-commit &> /dev/null; then
+        echo "Installing pre-commit..."
+        pip install --no-cache-dir pre-commit > /dev/null 2>&1
+      fi
     - |
       # Running pre-commit
       if [[ -n "$PRE_COMMIT_AUTO_FIX_BRANCH_ONLY" && -n "$PRE_COMMIT_AUTO_FIX_MR_ONLY" ]]; then
@@ -80,36 +93,36 @@ pre-commit:
          echo "Auto fix is only available in branch and merge request pipelines" > /dev/stderr
          exit 1
       fi
-    rules:
-      - if: '$PRE_COMMIT_SKIP_BRANCH_PIPELINE && $CI_COMMIT_BRANCH'
-        when: never
-      - if: '$PRE_COMMIT_SKIP_MR_PIPELINE && $CI_PIPELINE_SOURCE == "merge_request_event"'
-        when: never
-      - if: '$PRE_COMMIT_AUTO_FIX_BRANCH_ONLY && $CI_PIPELINE_SOURCE == "merge_request_event"'
-        variables:
-          PRE_COMMIT_AUTO_FIX: ""
-        when: on_success
-        exists:
-          - .pre-commit-config.yaml
-      - if: '$PRE_COMMIT_DEDUPLICATE_MR_AND_BRANCH == "true" && $CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS'
-        when: never
-      - if: '$PRE_COMMIT_AUTO_FIX_MR_ONLY && $CI_PIPELINE_SOURCE != "merge_request_event"'
-        variables:
-          PRE_COMMIT_AUTO_FIX: ""
-        exists:
-          - .pre-commit-config.yaml
-        when: on_success
-      - if: '$CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_EVENT_TYPE != "detached"'
-        variables:  # we don't support autofix for merged_result or merge_train pipelines, configure branch fixing instead
-          PRE_COMMIT_AUTO_FIX: ""
-        exists:
-          - .pre-commit-config.yaml
-      - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-        exists:
-          - .pre-commit-config.yaml
-        when: on_success
-      - if: '$CI_COMMIT_BRANCH'
-        exists:
-          - .pre-commit-config.yaml
-        when: on_success
-      - when: never
+  rules:
+    - if: "$PRE_COMMIT_SKIP_BRANCH_PIPELINE && $CI_COMMIT_BRANCH"
+      when: never
+    - if: '$PRE_COMMIT_SKIP_MR_PIPELINE && $CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: never
+    - if: '$PRE_COMMIT_AUTO_FIX_BRANCH_ONLY && $CI_PIPELINE_SOURCE == "merge_request_event"'
+      variables:
+        PRE_COMMIT_AUTO_FIX: ""
+      when: on_success
+      exists:
+        - .pre-commit-config.yaml
+    - if: '$PRE_COMMIT_DEDUPLICATE_MR_AND_BRANCH == "true" && $CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS'
+      when: never
+    - if: '$PRE_COMMIT_AUTO_FIX_MR_ONLY && $CI_PIPELINE_SOURCE != "merge_request_event"'
+      variables:
+        PRE_COMMIT_AUTO_FIX: ""
+      exists:
+        - .pre-commit-config.yaml
+      when: on_success
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_EVENT_TYPE != "detached"'
+      variables: # we don't support autofix for merged_result or merge_train pipelines, configure branch fixing instead
+        PRE_COMMIT_AUTO_FIX: ""
+      exists:
+        - .pre-commit-config.yaml
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      exists:
+        - .pre-commit-config.yaml
+      when: on_success
+    - if: "$CI_COMMIT_BRANCH"
+      exists:
+        - .pre-commit-config.yaml
+      when: on_success
+    - when: never
