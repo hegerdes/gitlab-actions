@@ -9,6 +9,22 @@ Currently sported are:
  * [Container Build: Buildah](https://gitlab.com/hegerdes/gitlab-actions#container-build-buildah) - requires GitLab >v16.11
  * [Code Quality: pre-commit](https://gitlab.com/hegerdes/gitlab-actions#Code-Quality:-pre-commit)
 
+**NOTE:** All components are `arm64` ready. Gitlab now offers hosted ARM runners. You can use these when setting:
+```yaml
+default:
+  tags: [saas-linux-medium-arm64]
+
+# or by including as a template and setting it by extending the job
+include:
+  - component: gitlab.com/hegerdes/gitlab-actions/kaniko-build@<VERSION>
+    inputs:
+      as_job: .my-kaniko-build
+
+my-kaniko-build:
+  tags: [saas-linux-medium-arm64]
+  extends: .my-kaniko-build
+```
+
 ## Container Build: Kaniko
 
 ### Usage
@@ -31,6 +47,7 @@ The template should work without modifications but you can customize the templat
 
 | Input                       | Default value                              | Description                                                                                                                  |
 | --------------------------- | ------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------- |
+| `as_job`                    | `kaniko_build`                             | The name of the job that gets imported. Use ".my_job" to include as template                                                 |
 | `stage`                     | `build`                                    | The stage where you want the job to be added                                                                                 |
 | `build_image`               | `gcr.io/kaniko-project/executor:debug`     | The Docker image of kaniko                                                                                                   |
 | `push`                      | `true`                                     | When set to `true` the image will be pushed to the default registry. Set to `false` to only build without pushing the image. |
@@ -79,6 +96,7 @@ The template should work without modifications but you can customize the templat
 
 | Input                       | Default value                              | Description                                                                                                                  |
 | --------------------------- | ------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------- |
+| `as_job`                    | `buildah_build`                            | The name of the job that gets imported. Use ".my_job" to include as template                                                 |
 | `stage`                     | `build`                                    | The stage where you want the job to be added                                                                                 |
 | `build_image`               | `gcr.io/kaniko-project/executor:debug`     | The Docker image of kaniko                                                                                                   |
 | `push`                      | `true`                                     | When set to `true` the image will be pushed to the default registry. Set to `false` to only build without pushing the image. |
@@ -119,20 +137,21 @@ include:
 ```
 
 where `<VERSION>` is the latest released tag or `main`. This will add a `pre-commit` job to the pipeline.
-*NOTE:* By default the latest version of the image `registry.gitlab.com/yesolutions/docker-pre-commit` is used. For a more predictable outcome you should pin the version to a specific tag via the `image` input.
+*NOTE:* By default the latest version of the image `python:3.12-slim` is used. For a more predictable outcome you should pin the version to a specific tag via the `image` input.
 
 
 The template should work without modifications but you can customize the template settings.
 ### Inputs
 
-| Input                       | Default value                                       | Description                                                                                                              |
-| --------------------------- | --------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
-| `stage`                     | `build`                                             | The stage where you want the job to be added                                                                             |
-| `image`                     | `registry.gitlab.com/yesolutions/docker-pre-commit` | The Docker image for pre-commit                                                                                          |
-| `force_run`                 | `false`                                             | When set to `true` it always adds the job                                                                                |
-| `autofix`                   | `false`                                             | When set to `true` it automatically try to fix the violating code and push it to gitlab. Needs `PRE_COMMIT_ACCESS_TOKEN` |
-| `access_token`              | `$CI_JOB_TOKEN`                                     | Token used to push it to gitlab. Must be set if `autofix` is enabled                                                     |
-| `deduplicate_mr_and_branch` | `true`                                              | Don't add the job twice for branch and PR                                                                                |
+| Input                       | Default value      | Description                                                                                                              |
+| --------------------------- | ------------------ | ------------------------------------------------------------------------------------------------------------------------ |
+| `as_job`                    | `pre-commit`       | The name of the job that gets imported. Use ".my_job" to include as template                                             |
+| `stage`                     | `.pre`             | The stage where you want the job to be added                                                                             |
+| `image`                     | `python:3.12-slim` | The Docker image for pre-commit                                                                                          |
+| `force_run`                 | `false`            | When set to `true` it always adds the job                                                                                |
+| `autofix`                   | `false`            | When set to `true` it automatically try to fix the violating code and push it to gitlab. Needs `PRE_COMMIT_ACCESS_TOKEN` |
+| `access_token`              | `$CI_JOB_TOKEN`    | Token used to push it to gitlab. Must be set if `autofix` is enabled                                                     |
+| `deduplicate_mr_and_branch` | `true`             | Don't add the job twice for branch and PR                                                                                |
 
 ### Variables
 

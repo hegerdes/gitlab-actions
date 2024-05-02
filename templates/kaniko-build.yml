@@ -1,5 +1,8 @@
 spec:
   inputs:
+    as_job:
+      type: string
+      default: kaniko_build
     stage:
       type: string
       default: build
@@ -60,7 +63,7 @@ spec:
         # Add the job to branch pipelines.
         - if: $CI_COMMIT_BRANCH
 ---
-kaniko_build:
+$[[ inputs.as_job ]]:
   stage: $[[ inputs.stage ]]
   image:
     name: "$[[ inputs.build_image ]]"
