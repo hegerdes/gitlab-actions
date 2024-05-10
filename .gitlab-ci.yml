@@ -21,7 +21,6 @@ include:
       dockerfile: $CI_PROJECT_DIR/tests/Dockerfile
   - component: $CI_SERVER_HOST/$CI_PROJECT_PATH/pre-commit@$CI_COMMIT_SHA
     inputs:
-      force_run: true
       autofix: true
       access_token: $PRE_COMMIT_ACCESS_TOKEN
 
