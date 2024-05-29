@@ -24,6 +24,30 @@ include:
       autofix: true
       access_token: $PRE_COMMIT_ACCESS_TOKEN
 
+# The above is all you need. But for testing the pipelines are run for amd64 and arm64.
+# So we override the jobs to use a matrix build. Again not needed by default.
+
+pre-commit:
+  tags: [$RUNNER]
+  parallel:
+    matrix:
+      - RUNNER: saas-linux-small-amd64
+      - RUNNER: saas-linux-medium-arm64
+
+buildah-build:
+  tags: [$RUNNER]
+  parallel:
+    matrix:
+      - RUNNER: saas-linux-small-amd64
+      - RUNNER: saas-linux-medium-arm64
+
+kaniko-build:
+  tags: [$RUNNER]
+  parallel:
+    matrix:
+      - RUNNER: saas-linux-small-amd64
+      - RUNNER: saas-linux-medium-arm64
+
 # If we are tagging a release with a specific convention ("v" + number) and all
 # previous checks succeeded, we proceed with creating a release automatically.
 create-release:
