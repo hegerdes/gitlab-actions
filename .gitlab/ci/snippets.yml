@@ -1,0 +1,188 @@
+.snippets:
+  debian-core-tools:
+    - |
+      # Installing core tools
+      if command -v apt-get > /dev/null; then
+        if [ ! -z ${HTTP_PROXY+x} ]; then
+          echo "Acquire::http::Proxy \"${HTTP_PROXY}\";" >> /etc/apt/apt.conf
+        fi
+        if [ ! -z ${HTTPS_PROXY+x} ]; then
+          echo "Acquire::https::Proxy \"${HTTPS_PROXY}\";" >> /etc/apt/apt.conf
+        fi
+        apt-get update -qq > /dev/null
+        apt-get install -y -qq --no-install-recommends \
+          curl jq unzip ca-certificates tar gzip > /dev/null
+      else
+        echo "The apt package manager does not exist. Skipping core tool install."
+      fi
+  alpine-core-tools:
+    - |
+      # Installing core tools
+      if command -v apk > /dev/null; then
+        apk add curl jq unzip tar gzip > /dev/null
+      else
+        echo "The apk package manager does not exist. Skipping core tool install."
+      fi
+  kubectl-install:
+    - |
+      # Check if kubectl is installed
+      if ! command -v kubectl > /dev/null; then
+        echo "Installing kubectl"
+        echo "You can set the desired version via KUBECTL_VERSION. Default is latest"
+        if [ "$(uname -m)" = "x86_64" ]; then
+          ARCH=amd64
+        elif [ "$(uname -m)" = "aarch64" ]; then
+          ARCH=arm64
+        else
+          echo "Unknown system arch. Default to amd64"
+        fi
+        KUBECTL_DEFAULT_VERSION=$(curl -sL https://dl.k8s.io/release/stable.txt)
+        KUBECTL_VERSION="${KUBECTL_VERSION-$KUBECTL_DEFAULT_VERSION}"
+        # Fix version not beginning with "v"
+        if ! echo "${KUBECTL_VERSION}" | grep -q "v"; then
+          KUBECTL_VERSION="v${KUBECTL_VERSION}"
+        fi
+        curl -sL --output /usr/bin/kubectl "https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/${ARCH-amd64}/kubectl"
+        chmod +x /usr/bin/kubectl
+      fi
+      kubectl version --client
+  kubectl-gitlab-agent:
+    - |
+      # Check if kubecontext should be configured'
+      if [ "$CI_KUBERNETES_ACTIVE" = "true" ] || [ ! -z ${GL_K8S_AGENT_ID+x} ] || [ ! -z ${GL_K8S_PROXY_URL+x} ] ; then
+        if [ "$CI_SERVER_HOST" == "gitlab.com" ]; then
+            GL_K8S_AGENT_HOST_DEFAULT="kas.gitlab.com"
+        else
+            GL_K8S_AGENT_HOST_DEFAULT="$CI_SERVER_HOST/-/kubernetes-agent/k8s-proxy/"
+        fi
+        echo "Using ${GL_K8S_PROXY_URL:-https://$GL_K8S_AGENT_HOST_DEFAULT} as k8s proxy server"
+        kubectl config set-credentials agent:$GL_K8S_AGENT_ID --token="ci:${GL_K8S_AGENT_ID}:${CI_JOB_TOKEN}"
+        kubectl config set-cluster gitlab --server="${GL_K8S_PROXY_URL:-https://$GL_K8S_AGENT_HOST_DEFAULT}"
+        kubectl config set-context "$GL_K8S_CONTEXT" --cluster=gitlab --user="agent:${GL_K8S_AGENT_ID}"
+        kubectl config use-context "$GL_K8S_CONTEXT"
+        kubectl config set-context --current --namespace=default
+        export KUBE_CONFIG_PATH=$KUBECONFIG
+        mkdir -p ~/.kube
+        cp $KUBECONFIG ~/.kube/config
+      fi
+  terraform-install:
+    - |
+      # Check if terraform is installed
+      if ! command -v terrafrom > /dev/null; then
+        echo "Installing terraform!"
+        echo "You can set the desired version via TERRFORM_VERSION. Default is latest"
+        if [ "$(uname -m)" = "x86_64" ]; then
+          ARCH=amd64
+        elif [ "$(uname -m)" = "aarch64" ]; then
+          ARCH=arm64
+        else
+          echo "Unknown system arch. Default to amd64"
+        fi
+        TERRFORM_DEFAULT_VERSION=$(curl -sL https://api.github.com/repos/hashicorp/terraform/releases/latest | jq -r .name)
+        TERRFORM_VERSION="${TERRFORM_VERSION-$TERRFORM_DEFAULT_VERSION}"
+        # Fix version beginning with "v"
+        if echo "${TERRFORM_VERSION}" | grep -q "v"; then
+          TERRFORM_VERSION="${TERRFORM_VERSION:1}"
+        fi
+        curl -sL --output /tmp/terraform.zip "https://releases.hashicorp.com/terraform/${TERRFORM_VERSION}/terraform_${TERRFORM_VERSION}_linux_${ARCH-amd64}.zip"
+        unzip /tmp/terraform.zip -d /usr/bin/ > /dev/null
+      fi
+      terraform --version
+  tflint-install:
+    - |
+      # Check if tflint is installed
+      if ! command -v tflint > /dev/null; then
+        echo "Installing tflint"
+        if [ "$(uname -m)" = "x86_64" ]; then
+          ARCH=amd64
+        elif [ "$(uname -m)" = "aarch64" ]; then
+          ARCH=arm64
+        else
+          echo "Unknown system arch. Default to amd64"
+        fi
+        TFLINT_SYSTEM_TYPE="linux_${ARCH-amd64}.zip"
+        TFLINT_RELEASES="https://api.github.com/repos/terraform-linters/tflint/releases/latest"
+        TFLINT_URL=$(curl -sL $TFLINT_RELEASES | jq -r --arg term $TFLINT_SYSTEM_TYPE '.assets[] | select(.name | test($term)).browser_download_url')
+        curl -sL --output /tmp/tflint.zip $TFLINT_URL
+        unzip /tmp/tflint.zip -d /usr/bin/ > /dev/null
+      fi
+      tflint --version
+  helm-install:
+    - |
+      # Check if helm is installed
+      if ! command -v helm > /dev/null; then
+        echo "Installing helm"
+        echo "You can set the desired version via HELM_VERSION. Default is latest"
+        if [ "$(uname -m)" = "x86_64" ]; then
+          ARCH=amd64
+        elif [ "$(uname -m)" = "aarch64" ]; then
+          ARCH=arm64
+        else
+          echo "Unknown system arch. Default to amd64"
+        fi
+        HELM_DEFAULT_VERSION=$(curl -sL https://api.github.com/repos/helm/helm/releases/latest | jq -r .tag_name)
+        curl -sL --output /tmp/helm.tar.gz https://get.helm.sh/helm-${HELM_VERSION-$HELM_DEFAULT_VERSION}-linux-${ARCH}.tar.gz
+        tar xzf /tmp/helm.tar.gz -C /usr/local/bin/ --strip-components=1 --exclude={LICENSE,README.md}
+      fi
+      helm version
+  minio-mc-install:
+    - |
+      # Check if minio mc is installed
+      if ! command -v mc > /dev/null; then
+        echo "Installing minio mc"
+        if [ "$(uname -m)" = "x86_64" ]; then
+          ARCH=amd64
+        elif [ "$(uname -m)" = "aarch64" ]; then
+          ARCH=arm64
+        else
+          echo "Unknown system arch. Default to amd64"
+        fi
+        curl -sL https://dl.min.io/client/mc/release/linux-${ARCH}/mc -o /usr/local/bin/mc
+        chmod +x /usr/local/bin/mc
+      fi
+      mc --version
+  azure-cli-install:
+    - |
+      # Check if az cli is installed
+      if ! command -v az > /dev/null; then
+        echo "Installing azure-cli"
+        mkdir -p /etc/apt/keyrings
+        apt-get update -qq > /dev/null
+        apt-get install -y -qq --no-install-recommends \
+          apt-transport-https ca-certificates curl gnupg lsb-release > /dev/null
+
+        curl -sLS https://packages.microsoft.com/keys/microsoft.asc |
+          gpg --dearmor -o /etc/apt/keyrings/microsoft.gpg
+        chmod go+r /etc/apt/keyrings/microsoft.gpg
+
+        echo "Types: deb
+        URIs: https://packages.microsoft.com/repos/azure-cli/
+        Suites: $(lsb_release -cs)
+        Components: main
+        Architectures: $(dpkg --print-architecture)
+        Signed-by: /etc/apt/keyrings/microsoft.gpg" > /etc/apt/sources.list.d/azure-cli.sources
+        sed -i 's/^[ \t]*//' /etc/apt/sources.list.d/azure-cli.sources
+
+      apt-get update -qq > /dev/null
+      apt-get install -y -qq azure-cli --no-install-recommends > /dev/null
+
+      fi
+      az version
+  aws-cli-install:
+    - |
+      # Check if aws cli is installed
+      if ! command -v aws > /dev/null; then
+        echo "Installing aws-cli"
+        curl -sL "https://awscli.amazonaws.com/awscli-exe-linux-$(uname -m).zip" -o "/tmp/awscliv2.zip"
+        unzip /tmp/awscliv2.zip -d /tmp > /dev/null
+        /tmp/aws/install > /dev/null
+      fi
+      aws --version
+  ssh-setup:
+    - |
+      # Setting up SSH
+      eval $(ssh-agent -s) > /dev/null
+      echo "$SSH_PRIVATE_KEY" | base64 --decode | tr -d '\r' | ssh-add - > /dev/null
+      mkdir -p ~/.ssh
+      chmod 700 ~/.ssh
+      echo "$SSH_HOST_KEY" >> ~/.ssh/known_hosts
