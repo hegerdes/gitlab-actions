@@ -38,7 +38,7 @@ include:
   - component: gitlab.com/hegerdes/gitlab-actions/kaniko-build@<VERSION>
 ```
 
-where `<VERSION>` is the latest released tag or `main`. This will add a `container_build` job to the pipeline.
+where `<VERSION>` is the latest released tag or `main`. This will add a `container_build` job to the pipeline.  
 *NOTE:* By default the latest version of kaniko is used. For a more predictable outcome you should pin the version to a specific tag via the `build_image` input.
 
 
@@ -74,6 +74,8 @@ The template should work without modifications but you can customize the templat
 | `CONTAINER_BUILD_EXTRA_ARGS ` | Extra args for the build engine.             |
 
 
+---
+
 ## Container Build: buildah
 
 ### Usage
@@ -87,7 +89,7 @@ include:
   - component: gitlab.com/hegerdes/gitlab-actions/buildah-build@<VERSION>
 ```
 
-where `<VERSION>` is the latest released tag or `main`. This will add a `container_build` job to the pipeline.
+where `<VERSION>` is the latest released tag or `main`. This will add a `container_build` job to the pipeline.  
 *NOTE:* By default the latest stable version of buildah is used. For a more predictable outcome you should pin the version to a specific tag via the `build_image` input.
 
 
@@ -122,6 +124,8 @@ The template should work without modifications but you can customize the templat
 | `DOCKER_AUTH_CONFIG `         | GitLab variable containing registry secrets. |
 | `CONTAINER_BUILD_EXTRA_ARGS ` | Extra args for the build engine.             |
 
+---
+
 ## Code Quality: pre-commit
 
 ### Usage
@@ -135,7 +139,7 @@ include:
   - component: gitlab.com/hegerdes/gitlab-actions/pre-commit@<VERSION>
 ```
 
-where `<VERSION>` is the latest released tag or `main`. This will add a `pre-commit` job to the pipeline.
+where `<VERSION>` is the latest released tag or `main`. This will add a `pre-commit` job to the pipeline.  
 *NOTE:* By default the latest version of the image `python:3.12-slim` is used. For a more predictable outcome you should pin the version to a specific tag via the `image` input.
 
 
