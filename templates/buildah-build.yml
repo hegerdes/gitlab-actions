@@ -43,9 +43,6 @@ spec:
     description:
       type: string
       default: $CI_PROJECT_DESCRIPTION
-    base_img_name:
-      type: string
-      default: UNKNOWN
     vendor:
       type: string
       default: UNKNOWN
@@ -84,7 +81,6 @@ $[[ inputs.as_job ]]:
     DESCRIPTION: "$[[ inputs.description ]]"
     VENDOR: "$[[ inputs.vendor ]]"
     LICENSE: "$[[ inputs.license ]]"
-    BASE_IMG_NAME: "$[[ inputs.base_img_name ]]"
   script:
     - echo "Using $(/usr/bin/buildah version)"
     - |
@@ -106,6 +102,12 @@ $[[ inputs.as_job ]]:
           CONTAINER_BUILD_IAMGE_TAGS="${CONTAINER_BUILD_IAMGE_TAGS}-t $(echo $IMAGE_TAG | xargs) "
       done
 
+      # Extract the base image name from the Dockerfile
+      if [ -f "$DOCKERFILE" ]; then
+          BASE_IMG_NAME=$(grep "FROM" "$DOCKERFILE" | tail -n 1 | awk '{print $2}')
+      else
+          echo "DOCKERFILE $DOCKERFILE does not exist."
+      fi
     - |
       echo "Building ${CONTAINER_BUILD_IAMGE_TAGS}..."
       eval $(echo "buildah build "${CONTAINER_BUILD_IAMGE_TAGS}" \

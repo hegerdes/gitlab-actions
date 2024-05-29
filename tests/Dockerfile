@@ -1,4 +1,4 @@
-FROM alpine
+FROM alpine as tmp
 
 RUN apk add bash
 

@@ -61,7 +61,6 @@ The template should work without modifications but you can customize the templat
 | `documentation_url`         | `$CI_PROJECT_URL`                          | For OCI image label: Url of the documentation.                                                                               |
 | `version`                   | `$CI_COMMIT_REF_NAME`                      | For OCI image label: Version of the image.                                                                                   |
 | `description`               | `$CI_PROJECT_DESCRIPTION`                  | For OCI image label: Description.                                                                                            |
-| `base_img_name`             | `UNKNOWN`                                  | For OCI image label: Base image name.                                                                                        |
 | `vendor`                    | `UNKNOWN`                                  | For OCI image label: Vendor name.                                                                                            |
 | `license`                   | `UNKNOWN`                                  | For OCI image label: License.                                                                                                |
 
@@ -112,7 +111,6 @@ The template should work without modifications but you can customize the templat
 | `documentation_url`         | `$CI_PROJECT_URL`                          | For OCI image label: Url of the documentation.                                                                               |
 | `version`                   | `$CI_COMMIT_REF_NAME`                      | For OCI image label: Version of the image.                                                                                   |
 | `description`               | `$CI_PROJECT_DESCRIPTION`                  | For OCI image label: Description.                                                                                            |
-| `base_img_name`             | `UNKNOWN`                                  | For OCI image label: Base image name.                                                                                        |
 | `vendor`                    | `UNKNOWN`                                  | For OCI image label: Vendor name.                                                                                            |
 | `license`                   | `UNKNOWN`                                  | For OCI image label: License.                                                                                                |
 
