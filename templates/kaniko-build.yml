@@ -43,9 +43,6 @@ spec:
     description:
       type: string
       default: $CI_PROJECT_DESCRIPTION
-    base_img_name:
-      type: string
-      default: UNKNOWN
     vendor:
       type: string
       default: UNKNOWN
@@ -84,7 +81,6 @@ $[[ inputs.as_job ]]:
     DESCRIPTION: "$[[ inputs.description ]]"
     VENDOR: "$[[ inputs.vendor ]]"
     LICENSE: "$[[ inputs.license ]]"
-    BASE_IMG_NAME: "$[[ inputs.base_img_name ]]"
   script:
     - echo "Using $(/kaniko/executor version)"
     - |
@@ -100,13 +96,20 @@ $[[ inputs.as_job ]]:
       IMAGE_TAGS="${IMAGE_TAGS#[}"
       IMAGE_TAGS="${IMAGE_TAGS%]}"
 
-      # # Read the cleaned-up string into an array, splitting by commas
+      # Read the cleaned-up string into an array, splitting by commas
       IFS=","
       for IMAGE_TAG in ${IMAGE_TAGS}; do
           # Ensure to strip any whitespace and send a curl request to each URL
           echo $IMAGE_TAG
           CONTAINER_BUILD_IAMGE_TAGS="${CONTAINER_BUILD_IAMGE_TAGS}--destination $(echo $IMAGE_TAG | xargs) "
       done
+
+      # Extract the base image name from the Dockerfile
+      if [ -f "$DOCKERFILE" ]; then
+          BASE_IMG_NAME=$(grep "FROM" "$DOCKERFILE" | tail -n 1 | awk '{print $2}')
+      else
+          echo "DOCKERFILE $DOCKERFILE does not exist."
+      fi
 
       echo "Building ${CONTAINER_BUILD_IAMGE_TAGS}..."
       echo "Using context \"${CONTEXT}\" with dockerfile \"${DOCKERFILE}\""
