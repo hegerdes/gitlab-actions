@@ -5,6 +5,8 @@ stages:
   - release
 
 include:
+  - local: .gitlab/ci/snippets.yml
+  - local: .gitlab/ci/rules.yml
   - component: $CI_SERVER_HOST/$CI_PROJECT_PATH/kaniko-build@$CI_COMMIT_SHA
     inputs:
       context: $CI_PROJECT_DIR/tests
@@ -22,6 +24,26 @@ include:
 # So we override the jobs to use a matrix build. Again not needed by default.
 # Currently there is no small arm runner
 
+snippets:
+  image: debian:bookworm-slim
+  tags: [$RUNNER]
+  parallel:
+    matrix:
+      - RUNNER: saas-linux-small-amd64
+      - RUNNER: saas-linux-medium-arm64
+  script:
+    - !reference [.snippets, debian-core-tools]
+    - !reference [.snippets, alpine-core-tools]
+    - !reference [.snippets, terraform-install]
+    - !reference [.snippets, tflint-install]
+    - !reference [.snippets, kubectl-install]
+    - !reference [.snippets, helm-install]
+    - !reference [.snippets, minio-mc-install]
+    - !reference [.snippets, yq-multi-install]
+    - !reference [.snippets, azure-cli-install]
+    - !reference [.snippets, aws-cli-install]
+  rules:
+    - !reference [.rules, default-merge-rules]
 pre-commit:
   tags: [$RUNNER]
   parallel:
@@ -46,6 +68,8 @@ kaniko-build:
     matrix:
       - RUNNER: saas-linux-small-amd64
       - RUNNER: saas-linux-medium-arm64
+  rules:
+    - !reference [.rules, default-merge-rules]
 
 # If we are tagging a release with a specific convention ("v" + number) and all
 # previous checks succeeded, we proceed with creating a release automatically.
