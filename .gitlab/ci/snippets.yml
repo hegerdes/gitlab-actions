@@ -63,7 +63,7 @@
         kubectl config set-context --current --namespace=default
         export KUBE_CONFIG_PATH=$KUBECONFIG
         mkdir -p ~/.kube
-        if [ -f $KUBECONFIG ]; then
+        if [ ! -z "$KUBECONFIG" ] && [ -f "$KUBECONFIG" ]; then
           cp $KUBECONFIG ~/.kube/config
         fi
       fi
