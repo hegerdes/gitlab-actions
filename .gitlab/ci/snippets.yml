@@ -51,7 +51,7 @@
       # Check if kubecontext should be configured'
       if [ "$CI_KUBERNETES_ACTIVE" = "true" ] || [ ! -z ${GL_K8S_AGENT_ID+x} ] || [ ! -z ${GL_K8S_PROXY_URL+x} ] ; then
         if [ "$CI_SERVER_HOST" == "gitlab.com" ]; then
-            GL_K8S_AGENT_HOST_DEFAULT="kas.gitlab.com"
+            GL_K8S_AGENT_HOST_DEFAULT="kas.gitlab.com/k8s-proxy"
         else
             GL_K8S_AGENT_HOST_DEFAULT="$CI_SERVER_HOST/-/kubernetes-agent/k8s-proxy/"
         fi
