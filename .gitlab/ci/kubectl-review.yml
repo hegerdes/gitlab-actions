@@ -1,0 +1,62 @@
+include:
+  - local: .gitlab/ci/snippets.yml
+  - local: .gitlab/ci/rules.yml
+
+.KUBE:create-review-app:
+  image: debian:bookworm-slim
+  stage: deploy
+  before_script:
+    - !reference [.snippets, debian-core-tools]
+    - !reference [.snippets, alpine-core-tools]
+    - !reference [.snippets, kubectl-install]
+    - !reference [.snippets, helm-install]
+    - !reference [.snippets, yq-multi-install]
+    - !reference [.snippets, kubectl-gitlab-agent]
+  script:
+    - echo "Starting review env..."
+    - kubectl cluster-info
+    # Examples
+    # - |
+    #   # Helm install
+    #   helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+    #   helm repo update
+    #   helm upgrade --install --atomic --wait --create-namespace -n $CI_COMMIT_REF_SLUG $CI_COMMIT_REF_SLUG ingress-nginx/ingress-nginx
+    # - |
+    #   # Adopting argo app
+    #   yq eval ".spec.source.helm.valuesObject.image.repository = \"${CI_REGISTRY_IMAGE}/backend\"" -i charts/deploy/argo-demo-app-flask-nuxt.yml
+    #   yq eval ".spec.source.helm.valuesObject.image.tag = \"${CI_COMMIT_REF_SLUG}\"" -i charts/deploy/argo-demo-app-flask-nuxt.yml
+    #   yq eval ".spec.source.helm.valuesObject.ingress.hosts[0].host = \"${CI_COMMIT_REF_SLUG}.123-preview.com\"" -i charts/deploy/argo-demo-app-flask-nuxt.yml
+    #   yq eval ".spec.destination.namespace = \"${CI_COMMIT_REF_SLUG}\"" -i charts/deploy/argo-demo-app-flask-nuxt.yml
+    #   yq eval ".metadata.name = \"demo-app-backend-${CI_COMMIT_REF_SLUG}\"" -i charts/deploy/argo-demo-app-flask-nuxt.yml
+    # - cat charts/deploy/argo-demo-app-flask-nuxt.yml
+    # - kubectl apply -f charts/deploy/argo-demo-app-flask-nuxt.yml
+  environment:
+    name: review/$CI_COMMIT_REF_SLUG
+    action: start
+    on_stop: KUBE:delete-review-app
+    auto_stop_in: 24h
+    deployment_tier: development
+    url: https://${CI_COMMIT_REF_SLUG}.${INGRESS_BASE_URL}
+  rules:
+    - !reference [.rules, default-merge-rules]
+
+.KUBE:delete-review-app:
+  extends: .KUBE:create-review-app
+  when: manual
+  allow_failure: true
+  environment:
+    name: review/$CI_COMMIT_REF_SLUG
+    action: stop
+  script:
+    - echo "Stopping review env..."
+    - kubectl cluster-info
+    # Examples
+    # - |
+    #   # Helm uninstall
+    #   helm uninstall -n $CI_COMMIT_REF_SLUG $CI_COMMIT_REF_SLUG
+    #   kubectl delete deploy nginx --namespace $CI_COMMIT_REF_SLUG
+    #   kubectl delete ns $CI_COMMIT_REF_SLUG
+    # - |
+    #   # Adopting argo app
+    #   yq eval ".metadata.name = \"demo-app-backend-${CI_COMMIT_REF_SLUG}\"" -i charts/deploy/argo-demo-app-flask-nuxt.yml
+    # - kubectl delete -f charts/deploy/argo-demo-app-flask-nuxt.yml
