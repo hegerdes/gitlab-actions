@@ -76,8 +76,6 @@ kaniko-build:
     matrix:
       - RUNNER: saas-linux-small-amd64
       - RUNNER: saas-linux-medium-arm64
-  rules:
-    - !reference [.rules, default-merge-rules]
 
 HELM:install:
   tags: [$RUNNER]
