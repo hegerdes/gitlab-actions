@@ -2,6 +2,7 @@
 stages:
   - test
   - build
+  - deploy
   - release
 
 include:
@@ -19,6 +20,11 @@ include:
     inputs:
       autofix: true
       access_token: $PRE_COMMIT_ACCESS_TOKEN
+  - component: $CI_SERVER_HOST/$CI_PROJECT_PATH/helm@$CI_COMMIT_SHA
+    inputs:
+      release_name: helm-ci-test
+      helm_extra_args: --atomic --wait --create-namespace --namespace test --dry-run --kube-apiserver https://kubernetes:6443 --kube-token 31ada4fd-adec-460c-809a-9e56ceb75269 --kube-insecure-skip-tls-verify
+      chart_path: tests/charts/demo
 
 # The above is all you need. But for testing the pipelines are run for amd64 and arm64.
 # So we override the jobs to use a matrix build. Again not needed by default.
@@ -70,6 +76,21 @@ kaniko-build:
       - RUNNER: saas-linux-medium-arm64
   rules:
     - !reference [.rules, default-merge-rules]
+
+HELM:install:
+  tags: [$RUNNER]
+  services:
+    - name: hegerdes/kubernetes-etcd
+      alias: kubernetes
+  parallel:
+    matrix:
+      - RUNNER: saas-linux-small-amd64
+      - RUNNER: saas-linux-medium-arm64
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_OPEN_MERGE_REQUESTS
+      when: never
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
 
 # If we are tagging a release with a specific convention ("v" + number) and all
 # previous checks succeeded, we proceed with creating a release automatically.
