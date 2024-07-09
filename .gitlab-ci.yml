@@ -49,7 +49,9 @@ snippets:
     - !reference [.snippets, azure-cli-install]
     - !reference [.snippets, aws-cli-install]
   rules:
+    - !reference [.rules, default-branch-only-rules]
     - !reference [.rules, default-merge-rules]
+
 pre-commit:
   tags: [$RUNNER]
   parallel:
