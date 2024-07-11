@@ -127,11 +127,48 @@
         tar xzf /tmp/helm.tar.gz -C /usr/local/bin/ --strip-components=1 --exclude={LICENSE,README.md}
       fi
       helm version
+  kind-install:
+    - |
+      # Check if kind is installed
+      if ! command -v kind > /dev/null; then
+        echo "Installing kind"
+        echo "You can set the desired version via KIND_VERSION. Default is latest"
+        if [ "$(uname -m)" = "x86_64" ]; then
+          ARCH=amd64
+        elif [ "$(uname -m)" = "aarch64" ]; then
+          ARCH=arm64
+        else
+          echo "Unknown system arch. Default to amd64"
+        fi
+        KIND_DEFAULT_VERSION=$(curl -sL https://api.github.com/repos/kubernetes-sigs/kind/releases/latest | jq -r .tag_name)
+        curl -sL --output /usr/local/bin/kind https://github.com/kubernetes-sigs/kind/releases/download/${KIND_VERSION-$KIND_DEFAULT_VERSION}/kind-linux-${ARCH-amd64}
+        chmod +x /usr/local/bin/kind
+      fi
+      kind version
+  kubeseal-install:
+    - |
+      # Check if kubeseal is installed
+      if ! command -v kubeseal > /dev/null; then
+        echo "Installing kubeseal"
+        echo "You can set the desired version via KUBESEAL_VERSION. Default is latest"
+        if [ "$(uname -m)" = "x86_64" ]; then
+          ARCH=amd64
+        elif [ "$(uname -m)" = "aarch64" ]; then
+          ARCH=arm64
+        else
+          echo "Unknown system arch. Default to amd64"
+        fi
+        KUBESEAL_DEFAULT_VERSION=$(curl -sL https://api.github.com/repos/bitnami-labs/sealed-secrets/releases/latest | jq -r .tag_name | cut -c 2-)
+        curl -sL --output kubeseal.tar.gz "https://github.com/bitnami-labs/sealed-secrets/releases/download/v${KUBESEAL_VERSION-$KUBESEAL_DEFAULT_VERSION}/kubeseal-${KUBESEAL_VERSION-$KUBESEAL_DEFAULT_VERSION}-linux-${ARCH-amd64}.tar.gz"
+        tar -xzf kubeseal.tar.gz -C /usr/bin kubeseal
+        chmod +x /usr/bin/kubeseal
+      fi
+      kubeseal --version
   yq-multi-install:
     - |
-      # Check if helm is installed
+      # Check if yq is installed
       if ! command -v yq > /dev/null; then
-        echo "Installing yq"
+        echo "Installing yq (by Mike Farah)"
         echo "You can set the desired version via YQ_VERSION. Default is latest"
         if [ "$(uname -m)" = "x86_64" ]; then
           ARCH=amd64
@@ -166,27 +203,30 @@
     - |
       # Check if az cli is installed
       if ! command -v az > /dev/null; then
-        echo "Installing azure-cli"
-        mkdir -p /etc/apt/keyrings
-        apt-get update -qq > /dev/null
-        apt-get install -y -qq --no-install-recommends \
-          apt-transport-https ca-certificates curl gnupg lsb-release > /dev/null
+        if command -v apt-get > /dev/null; then
+          echo "Installing azure-cli"
+          mkdir -p /etc/apt/keyrings
+          apt-get update -qq > /dev/null
+          apt-get install -y -qq --no-install-recommends \
+            apt-transport-https ca-certificates curl gnupg lsb-release > /dev/null
 
-        curl -sLS https://packages.microsoft.com/keys/microsoft.asc |
-          gpg --dearmor -o /etc/apt/keyrings/microsoft.gpg
-        chmod go+r /etc/apt/keyrings/microsoft.gpg
+          curl -sLS https://packages.microsoft.com/keys/microsoft.asc |
+            gpg --dearmor -o /etc/apt/keyrings/microsoft.gpg
+          chmod go+r /etc/apt/keyrings/microsoft.gpg
 
-        echo "Types: deb
-        URIs: https://packages.microsoft.com/repos/azure-cli/
-        Suites: $(lsb_release -cs)
-        Components: main
-        Architectures: $(dpkg --print-architecture)
-        Signed-by: /etc/apt/keyrings/microsoft.gpg" > /etc/apt/sources.list.d/azure-cli.sources
-        sed -i 's/^[ \t]*//' /etc/apt/sources.list.d/azure-cli.sources
+          echo "Types: deb
+          URIs: https://packages.microsoft.com/repos/azure-cli/
+          Suites: $(lsb_release -cs)
+          Components: main
+          Architectures: $(dpkg --print-architecture)
+          Signed-by: /etc/apt/keyrings/microsoft.gpg" > /etc/apt/sources.list.d/azure-cli.sources
+          sed -i 's/^[ \t]*//' /etc/apt/sources.list.d/azure-cli.sources
 
-      apt-get update -qq > /dev/null
-      apt-get install -y -qq azure-cli --no-install-recommends > /dev/null
-
+          apt-get update -qq > /dev/null
+          apt-get install -y -qq azure-cli --no-install-recommends > /dev/null
+        else
+          echo "Azure CLI install is currently only supported in debian based images. Skipping install!"
+        fi
       fi
       az version
   aws-cli-install:

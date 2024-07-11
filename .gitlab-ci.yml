@@ -44,6 +44,8 @@ snippets:
     - !reference [.snippets, tflint-install]
     - !reference [.snippets, kubectl-install]
     - !reference [.snippets, helm-install]
+    - !reference [.snippets, kubeseal-install]
+    - !reference [.snippets, kind-install]
     - !reference [.snippets, minio-mc-install]
     - !reference [.snippets, yq-multi-install]
     - !reference [.snippets, azure-cli-install]
