@@ -8,6 +8,7 @@ Currently sported are:
  * [Container Build: Kaniko](https://gitlab.com/hegerdes/gitlab-actions#container-build-kaniko) - requires GitLab >v16.11
  * [Container Build: Buildah](https://gitlab.com/hegerdes/gitlab-actions#container-build-buildah) - requires GitLab >v16.11
  * [Code Quality: pre-commit](https://gitlab.com/hegerdes/gitlab-actions#Code-Quality:-pre-commit)
+ * [Deployment: Helm install/upgrade](https://gitlab.com/hegerdes/gitlab-actions#Deployment-helm-install)
 
 **NOTE:** All components are `arm64` ready. Gitlab now offers hosted ARM runners. You can use these when setting:
 ```yaml
@@ -164,7 +165,38 @@ For details, see the following links:
 - https://docs.gitlab.com/ee/user/application_security/container_scanning/index.html#overriding-the-container-scanning-template
 - https://docs.gitlab.com/ee/user/application_security/container_scanning/#vulnerability-allowlisting
 - List of available variables: https://docs.gitlab.com/ee/user/application_security/container_scanning/#available-variables
+---
 
+## Deployment: Helm install
+
+### Usage
+
+Use this component deploy helm charts to a kubernetes cluster. It supports instals and upgrades.
+You should add this component to an existing `.gitlab-ci.yml` file by using the `include:`
+keyword.
+
+```yaml
+include:
+  - component: gitlab.com/hegerdes/gitlab-actions/helm@<VERSION>
+```
+
+where `<VERSION>` is the latest released tag or `main`. This will add a `pre-commit` job to the pipeline.  
+*NOTE:* By default the latest version of the image `python:3.12-slim` is used. For a more predictable outcome you should pin the version to a specific tag via the `image` input.
+
+
+The template should work without modifications but you can customize the template settings.
+### Inputs
+
+| Input             | Default value                 | Description                                                                  |
+| ----------------- | ----------------------------- | ---------------------------------------------------------------------------- |
+| `as_job`          | `HELM:install`                | The name of the job that gets imported. Use ".my_job" to include as template |
+| `stage`           | `deploy`                      | The stage where you want the job to be added                                 |
+| `image`           | `debian:bookworm-slim`        | The Docker image for pre-commit                                              |
+| `release_name`    | <REQUIRED>                    | Helm release name                                                            |
+| `chart_path`      | <REQUIRED>                    | Path to the helm chart                                                       |
+| `helm_extra_args` | `--atomic --wait`             | Extra helm args. Example are namespace, set or dry-run for testing           |
+| `values_file`     | `none`                        | Optional path for values file                                                |
+| `rules`           | `Array - Default merge rules` | Default merge rules                                                          |
 
 ## Contribute
 

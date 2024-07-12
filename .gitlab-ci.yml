@@ -23,7 +23,7 @@ include:
   - component: $CI_SERVER_HOST/$CI_PROJECT_PATH/helm@$CI_COMMIT_SHA
     inputs:
       release_name: helm-ci-test
-      helm_extra_args: --atomic --wait --create-namespace --namespace test --dry-run --kube-apiserver https://kubernetes:6443 --kube-token 31ada4fd-adec-460c-809a-9e56ceb75269 --kube-insecure-skip-tls-verify
+      helm_extra_args: --atomic --wait --create-namespace --namespace test --dry-run --kube-apiserver https://kubernetes:6443 --kube-token $KUBE_TOKEN --kube-insecure-skip-tls-verify
       chart_path: tests/charts/demo
 
 # The above is all you need. But for testing the pipelines are run for amd64 and arm64.

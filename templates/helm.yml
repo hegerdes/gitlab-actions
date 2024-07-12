@@ -15,9 +15,9 @@ spec:
     values_file:
       type: string
       default: "none"
-    job_name_prefix:
+    as_job:
       type: string
-      default: HELM
+      default: HELM:install
     rules:
       type: array
       default:
@@ -33,7 +33,7 @@ spec:
 include:
   - local: .gitlab/ci/snippets.yml
 
-$[[ inputs.job_name_prefix ]]:install:
+$[[ inputs.as_job ]]:
   stage: "$[[ inputs.stage ]]"
   image:
     name: "$[[ inputs.image ]]"
