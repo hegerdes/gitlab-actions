@@ -7,14 +7,17 @@ spec:
       type: string
     release_name:
       type: string
-    chart_path:
+    chart:
       type: string
+    repo:
+      type: string
+      default: none
     helm_extra_args:
       type: string
-      default: "--atomic --wait"
+      default: --atomic --wait
     values_file:
       type: string
-      default: "none"
+      default: none
     as_job:
       type: string
       default: HELM:install
@@ -47,6 +50,16 @@ $[[ inputs.as_job ]]:
       # Running helm install/upgrade
       HELM_EXTRA_ARGS_MERGED="$[[ inputs.helm_extra_args ]] ${HELM_EXTRA_ARGS}"
       HELM_VALUES_FILE=$[[ inputs.values_file ]]
+      HELM_REPO=$[[ inputs.repo ]]
+
+      if [ "$HELM_REPO" != "none" ]; then
+        echo "Adding repo ${HELM_REPO}";
+        helm repo add remote "${HELM_REPO}"
+        helm repo update
+        HELM_REPO_CHART="remote/$[[ inputs.chart ]]"
+      else
+        HELM_REPO_CHART="$[[ inputs.chart ]]"
+      fi
 
       if [ "$HELM_VALUES_FILE" != "none" ]; then
         echo "Using values file ${HELM_VALUES_FILE}";
@@ -56,6 +69,13 @@ $[[ inputs.as_job ]]:
         echo "NOTE: Using dry-run. Changes will NOT be applied!"
       fi
       echo "Using helm extra args: ${HELM_EXTRA_ARGS_MERGED:-none}"
-    - helm lint $[[ inputs.chart_path ]] $HELM_VALUES_ARG
-    - helm upgrade --install $[[ inputs.release_name ]] $[[ inputs.chart_path ]] $HELM_VALUES_ARG $HELM_EXTRA_ARGS_MERGED
+    - |
+      # Lint if its a local chart
+      if [[ "$HELM_REPO" == "none" ]] && [[ "$[[ inputs.chart ]]" != *"https://"* ]]; then
+        echo "Adding repo ${HELM_REPO}";
+        echo "Linting $[[ inputs.chart ]]"
+        helm lint $[[ inputs.chart ]] $HELM_VALUES_ARG
+      fi
+    - echo "helm upgrade --install $[[ inputs.release_name ]] ${HELM_REPO_CHART} $HELM_VALUES_ARG $HELM_EXTRA_ARGS_MERGED"
+    - helm upgrade --install $[[ inputs.release_name ]] $HELM_REPO_CHART $HELM_VALUES_ARG $HELM_EXTRA_ARGS_MERGED
   rules: $[[ inputs.rules ]]
