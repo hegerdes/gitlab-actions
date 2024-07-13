@@ -187,16 +187,17 @@ where `<VERSION>` is the latest released tag or `main`. This will add a `pre-com
 The template should work without modifications but you can customize the template settings.
 ### Inputs
 
-| Input             | Default value                 | Description                                                                  |
-| ----------------- | ----------------------------- | ---------------------------------------------------------------------------- |
-| `as_job`          | `HELM:install`                | The name of the job that gets imported. Use ".my_job" to include as template |
-| `stage`           | `deploy`                      | The stage where you want the job to be added                                 |
-| `image`           | `debian:bookworm-slim`        | The Docker image for pre-commit                                              |
-| `release_name`    | <REQUIRED>                    | Helm release name                                                            |
-| `chart_path`      | <REQUIRED>                    | Path to the helm chart                                                       |
-| `helm_extra_args` | `--atomic --wait`             | Extra helm args. Example are namespace, set or dry-run for testing           |
-| `values_file`     | `none`                        | Optional path for values file                                                |
-| `rules`           | `Array - Default merge rules` | Default merge rules                                                          |
+| Input             | Default value                 | Description                                                                                      |
+| ----------------- | ----------------------------- | ------------------------------------------------------------------------------------------------ |
+| `as_job`          | `HELM:install`                | The name of the job that gets imported. Use ".my_job" to include as template                     |
+| `stage`           | `deploy`                      | The stage where you want the job to be added                                                     |
+| `image`           | `debian:bookworm-slim`        | The Docker image for pre-commit                                                                  |
+| `release_name`    | <REQUIRED>                    | Helm release name                                                                                |
+| `chart`           | <REQUIRED>                    | The local path to a helm chart or the full URL. Can also be the chart name if helm `repo` is set |
+| `repo`            | `none`                        | The url to a helm repo chart                                                                     |
+| `helm_extra_args` | `--atomic --wait`             | Extra helm args. Example are namespace, set or dry-run for testing                               |
+| `values_file`     | `none`                        | Optional path for values file                                                                    |
+| `rules`           | `Array - Default merge rules` | Default merge rules                                                                              |
 
 ## Contribute
 
