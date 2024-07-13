@@ -95,10 +95,10 @@ HELM:install:
     matrix:
       - RUNNER: saas-linux-small-amd64
       - RUNNER: saas-linux-medium-arm64
-  before_script:
-    - !reference [.snippets, debian-core-tools]
-    - !reference [.snippets, kubectl-install]
-    - !reference [.snippets, kubectl-gitlab-agent]
+  # before_script:
+  #   - !reference [.snippets, debian-core-tools]
+  #   - !reference [.snippets, kubectl-install]
+  #   - !reference [.snippets, kubectl-gitlab-agent]
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
     - if: $CI_OPEN_MERGE_REQUESTS
