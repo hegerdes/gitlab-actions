@@ -48,7 +48,7 @@
       kubectl version --client
   kubectl-gitlab-agent:
     - |
-      # Check if kubecontext should be configured'
+      # Check if kubecontext should be configured
       if [ "$CI_KUBERNETES_ACTIVE" = "true" ] || [ ! -z ${GL_K8S_AGENT_ID+x} ] || [ ! -z ${GL_K8S_PROXY_URL+x} ] ; then
         if [ "$CI_SERVER_HOST" == "gitlab.com" ]; then
             GL_K8S_AGENT_HOST_DEFAULT="kas.gitlab.com/k8s-proxy"
@@ -161,6 +161,7 @@
         KUBESEAL_DEFAULT_VERSION=$(curl -sL https://api.github.com/repos/bitnami-labs/sealed-secrets/releases/latest | jq -r .tag_name | cut -c 2-)
         curl -sL --output kubeseal.tar.gz "https://github.com/bitnami-labs/sealed-secrets/releases/download/v${KUBESEAL_VERSION-$KUBESEAL_DEFAULT_VERSION}/kubeseal-${KUBESEAL_VERSION-$KUBESEAL_DEFAULT_VERSION}-linux-${ARCH-amd64}.tar.gz"
         tar -xzf kubeseal.tar.gz -C /usr/bin kubeseal
+        rm kubeseal.tar.gz
         chmod +x /usr/bin/kubeseal
       fi
       kubeseal --version
@@ -199,6 +200,31 @@
         chmod +x /usr/local/bin/mc
       fi
       mc --version
+  tailscale-install:
+    - |
+      # Check if tailscale is installed
+      if ! command -v tailscale > /dev/null; then
+        echo "Installing tailscale"
+        if [ "$(uname -m)" = "x86_64" ]; then
+          ARCH=amd64
+        elif [ "$(uname -m)" = "aarch64" ]; then
+          ARCH=arm64
+        else
+          echo "Unknown system arch. Default to amd64"
+        fi
+        TAILSCALE_DEFAULT_VERSION=$(curl -sL https://api.github.com/repos/tailscale/tailscale/releases/latest | jq -r .tag_name)
+        TAILSCALE_VERSION=${TAILSCALE_VERSION-$TAILSCALE_DEFAULT_VERSION}
+        # Fix version beginning with "v"
+        if echo "${TAILSCALE_VERSION}" | grep -q "v"; then
+          TAILSCALE_VERSION="${TAILSCALE_VERSION:1}"
+        fi
+        FILE_PREFIX="tailscale_${TAILSCALE_VERSION}_${ARCH-amd64}"
+        curl -sL https://pkgs.tailscale.com/stable/${FILE_PREFIX}.tgz -o tailscale.tar.gz
+        tar -xzf tailscale.tar.gz --strip-components=1 -C /usr/local/bin/ $FILE_PREFIX/tailscale $FILE_PREFIX/tailscaled
+        rm tailscale.tar.gz
+      fi
+      mkdir -p /var/run/tailscale
+      tailscale --version
   azure-cli-install:
     - |
       # Check if az cli is installed
@@ -224,11 +250,11 @@
 
           apt-get update -qq > /dev/null
           apt-get install -y -qq azure-cli --no-install-recommends > /dev/null
+          az version
         else
           echo "Azure CLI install is currently only supported in debian based images. Skipping install!"
         fi
       fi
-      az version
   aws-cli-install:
     - |
       # Check if aws cli is installed
