@@ -2,15 +2,30 @@
 ![CI/CD](https://gitlab.com/hegerdes/gitlab-actions/badges/main/pipeline.svg)
 ![Release](https://gitlab.com/hegerdes/gitlab-actions/-/badges/release.svg)
 
-This repo contains a collection of different [GotLab CI/CD Components](https://about.gitlab.com/blog/2023/12/21/introducing-the-gitlab-ci-cd-catalog-beta/).
+This repo contains a collection of different [GotLab CI/CD Components](https://about.gitlab.com/blog/2023/12/21/introducing-the-gitlab-ci-cd-catalog-beta/) and snippets to be included in the script section of a job.
 
-Currently sported are:
+Currently sported components are:
  * [Container Build: Kaniko](https://gitlab.com/hegerdes/gitlab-actions#container-build-kaniko) - requires GitLab >v16.11
  * [Container Build: Buildah](https://gitlab.com/hegerdes/gitlab-actions#container-build-buildah) - requires GitLab >v16.11
  * [Code Quality: pre-commit](https://gitlab.com/hegerdes/gitlab-actions#Code-Quality:-pre-commit)
- * [Deployment: Helm install/upgrade](https://gitlab.com/hegerdes/gitlab-actions#Deployment-helm-install)
+ * [Deployment: Helm install/upgrade](https://gitlab.com/hegerdes/gitlab-actions#deployment-helm-install)
 
-**NOTE:** All components are `arm64` ready. Gitlab now offers hosted ARM runners. You can use these when setting:
+Currently sported snippets are:
+ * debian-core-tools
+ * alpine-core-tools
+ * terraform-install
+ * tflint-install
+ * kubectl-install
+ * helm-install
+ * kubeseal-install
+ * kind-install
+ * tailscale-install
+ * minio-mc-install
+ * yq-multi-install
+ * azure-cli-install
+ * aws-cli-install
+ * 
+**NOTE:** All components and snippets are `arm64` ready. Gitlab now offers hosted ARM runners. You can use these when setting:
 ```yaml
 default:
   tags: [saas-linux-medium-arm64]
@@ -171,17 +186,20 @@ For details, see the following links:
 
 ### Usage
 
-Use this component deploy helm charts to a kubernetes cluster. It supports instals and upgrades.
+Use this component deploy helm charts to a kubernetes cluster. It supports installs and upgrades. The chart can either be in the repo, a link to a chart or a chart name of a helm repo is specified.
 You should add this component to an existing `.gitlab-ci.yml` file by using the `include:`
 keyword.
 
 ```yaml
 include:
   - component: gitlab.com/hegerdes/gitlab-actions/helm@<VERSION>
+    inputs:
+      release_name: my-release
+      chart: tests/charts/demo
 ```
 
-where `<VERSION>` is the latest released tag or `main`. This will add a `pre-commit` job to the pipeline.  
-*NOTE:* By default the latest version of the image `python:3.12-slim` is used. For a more predictable outcome you should pin the version to a specific tag via the `image` input.
+where `<VERSION>` is the latest released tag or `main`. This will add a `HELM:install` job to the pipeline.  
+*NOTE:* By default the latest version of helm is used. For a more predictable outcome you should use a image with a pined helm version or set the `HELM_VERSION` environment variable.
 
 
 The template should work without modifications but you can customize the template settings.
@@ -191,14 +209,15 @@ The template should work without modifications but you can customize the templat
 | ----------------- | ----------------------------- | ------------------------------------------------------------------------------------------------ |
 | `as_job`          | `HELM:install`                | The name of the job that gets imported. Use ".my_job" to include as template                     |
 | `stage`           | `deploy`                      | The stage where you want the job to be added                                                     |
-| `image`           | `debian:bookworm-slim`        | The Docker image for pre-commit                                                                  |
+| `image`           | `debian:bookworm-slim`        | The Docker image for helm. Helm will be automatically installed                                  |
 | `release_name`    | <REQUIRED>                    | Helm release name                                                                                |
 | `chart`           | <REQUIRED>                    | The local path to a helm chart or the full URL. Can also be the chart name if helm `repo` is set |
-| `repo`            | `none`                        | The url to a helm repo chart                                                                     |
+| `repo`            | `none`                        | The url to a helm chart repo                                                                     |
 | `helm_extra_args` | `--atomic --wait`             | Extra helm args. Example are namespace, set or dry-run for testing                               |
 | `values_file`     | `none`                        | Optional path for values file                                                                    |
 | `rules`           | `Array - Default merge rules` | Default merge rules                                                                              |
 
 ## Contribute
 
+Feel free to open a issue or a PR. Any new CI tasks must have tests for them and must run on amd64 and arm64.
 Please read about CI/CD components and best practices at: https://docs.gitlab.com/ee/ci/components
