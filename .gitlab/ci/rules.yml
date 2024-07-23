@@ -5,6 +5,9 @@
     # Don't add it to a *branch* pipeline if it's already in a merge request pipeline.
     - if: $CI_OPEN_MERGE_REQUESTS
       when: never
+    # Don't add it to a *tag* pipeline.
+    - if: $CI_COMMIT_TAG
+      when: never
     # Add the job to branch pipelines.
     - if: "$CI_COMMIT_REF_NAME != $CI_DEFAULT_BRANCH"
   default-branch-only-rules:
@@ -12,3 +15,5 @@
     - if: "$CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH"
   default-schedule-rules:
     - if: $CI_PIPELINE_SOURCE == "schedule"
+  default-tag-only-rules:
+    - if: $CI_COMMIT_TAG

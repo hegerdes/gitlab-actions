@@ -24,7 +24,7 @@ Currently sported snippets are:
  * yq-multi-install
  * azure-cli-install
  * aws-cli-install
- * 
+
 **NOTE:** All components and snippets are `arm64` ready. Gitlab now offers hosted ARM runners. You can use these when setting:
 ```yaml
 default:
