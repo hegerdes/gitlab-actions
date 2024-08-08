@@ -1,0 +1,81 @@
+spec:
+  inputs:
+    stage:
+      default: deploy
+    image:
+      default: debian:bookworm-slim
+      type: string
+    release_name:
+      type: string
+    chart:
+      type: string
+    repo:
+      type: string
+      default: none
+    helm_extra_args:
+      type: string
+      default: --atomic --wait
+    values_file:
+      type: string
+      default: none
+    job_name_prefix:
+      type: string
+      default: HELM
+    rules:
+      type: array
+      default:
+        # Add the job to merge request pipelines if there's an open merge request.
+        - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+          when: manual
+        # Don't add it to a *branch* pipeline if it's already in a merge request pipeline.
+        - if: $CI_OPEN_MERGE_REQUESTS
+          when: never
+        # Add the job to main branch pipelines.
+        - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+---
+include:
+  - local: .gitlab/ci/snippets.yml
+
+$[[ inputs.job_name_prefix ]]:install:
+  stage: "$[[ inputs.stage ]]"
+  image:
+    name: "$[[ inputs.image ]]"
+    entrypoint: [""]
+  script:
+    - echo "Using image $[[ inputs.image ]] on ${CI_COMMIT_REF_NAME}@${CI_COMMIT_SHORT_SHA}"
+    - !reference [.snippets, debian-core-tools]
+    - !reference [.snippets, alpine-core-tools]
+    - !reference [.snippets, helm-install]
+    - |
+      # Running helm install/upgrade
+      HELM_EXTRA_ARGS_MERGED="$[[ inputs.helm_extra_args ]] ${HELM_EXTRA_ARGS}"
+      HELM_VALUES_FILE=$[[ inputs.values_file ]]
+      HELM_REPO=$[[ inputs.repo ]]
+
+      if [ "$HELM_REPO" != "none" ]; then
+        echo "Adding repo ${HELM_REPO}";
+        helm repo add remote "${HELM_REPO}"
+        helm repo update
+        HELM_REPO_CHART="remote/$[[ inputs.chart ]]"
+      else
+        HELM_REPO_CHART="$[[ inputs.chart ]]"
+      fi
+
+      if [ "$HELM_VALUES_FILE" != "none" ]; then
+        echo "Using values file ${HELM_VALUES_FILE}";
+        HELM_VALUES_ARG="--values ${HELM_VALUES_FILE}"
+      fi
+      if [[ $HELM_EXTRA_ARGS_MERGED == *"dry-run"* ]]; then
+        echo "NOTE: Using dry-run. Changes will NOT be applied!"
+      fi
+      echo "Using helm extra args: ${HELM_EXTRA_ARGS_MERGED:-none}"
+    - |
+      # Lint if its a local chart
+      if [[ "$HELM_REPO" == "none" ]] && [[ "$[[ inputs.chart ]]" != *"https://"* ]]; then
+        echo "Adding repo ${HELM_REPO}";
+        echo "Linting $[[ inputs.chart ]]"
+        helm lint $[[ inputs.chart ]] $HELM_VALUES_ARG
+      fi
+    - echo "helm upgrade --install $[[ inputs.release_name ]] ${HELM_REPO_CHART} $HELM_VALUES_ARG $HELM_EXTRA_ARGS_MERGED"
+    - helm upgrade --install $[[ inputs.release_name ]] $HELM_REPO_CHART $HELM_VALUES_ARG $HELM_EXTRA_ARGS_MERGED
+  rules: $[[ inputs.rules ]]

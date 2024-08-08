@@ -36,6 +36,24 @@ spec:
 include:
   - local: .gitlab/ci/snippets.yml
 
+publish-helm-chart:
+  image:
+    name: alpine/helm
+    entrypoint: [""]
+  stage: build
+  variables:
+    CHART_CHANNEL: stable
+    CHARTS_CONTEXT: charts
+    CHART_VERSION: 0.1.1
+  script:
+    # Package
+    - helm package --app-version $CI_COMMIT_SHORT_SHA --version $CHART_VERSION $CHARTS_CONTEXT
+    # Push via Helm
+    # - helm repo add --username gitlab-ci-token --password $CI_JOB_TOKEN $CI_PROJECT_NAME ${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/helm/$CHART_CHANNEL
+    # - helm cm-push $CI_PROJECT_NAME-$CHART_VERSION.tgz $CI_PROJECT_NAME
+    # Push via curl
+    - curl --request POST --user gitlab-ci-token:$CI_JOB_TOKEN --form "chart=@$CI_PROJECT_NAME-$CHART_VERSION.tgz" "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/helm/api/$CHART_CHANNEL/charts"
+
 $[[ inputs.as_job ]]:
   stage: "$[[ inputs.stage ]]"
   image:
