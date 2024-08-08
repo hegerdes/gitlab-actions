@@ -1,0 +1,116 @@
+# yaml-language-server: $schema=https://gitlab.com/gitlab-org/gitlab/-/raw/master/app/assets/javascripts/editor/schema/ci.json
+
+spec:
+  inputs:
+    stage:
+      type: string
+      default: build
+    image:
+      default: alpine/helm:latest
+      type: string
+    chart:
+      type: string
+    chart_version:
+      type: string
+      default: default
+    app_version:
+      type: string
+      default: default
+    chart_repo:
+      type: string
+      default: $CI_API_V4_URL
+    chart_publish:
+      type: boolean
+      default: true
+    chart_repo_user:
+      type: string
+      default: ""
+    chart_repo_password:
+      type: string
+      default: ""
+    job_name_prefix:
+      type: string
+      default: HELM
+    rules:
+      type: array
+      default:
+        # Add the job to merge request pipelines if there's an open merge request.
+        - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+          variables:
+            HELM_VERSION_POSTFIX: $CI_COMMIT_REF_SLUG
+        # Don't add it to a branch pipeline if it's already in a merge request pipeline.
+        - if: $CI_OPEN_MERGE_REQUESTS
+          when: never
+        # Add the job to main branch pipelines.
+        - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+        - if: $CI_COMMIT_TAG
+          variables:
+            HELM_CHART_VERSION: $CI_COMMIT_TAG
+---
+include:
+  - local: templates/snippets.yml
+
+$[[ inputs.job_name_prefix ]]:package:
+  image:
+    name: "$[[ inputs.image ]]"
+    entrypoint: [""]
+  stage: build
+  variables:
+    HELM_APP_VERSION: $[[ inputs.chart_version ]]
+    HELM_CHART_VERSION: $[[ inputs.chart_version ]]
+    HELM_CHART_PATH: $[[ inputs.chart ]]
+    HELM_CHART_PUBLISH: $[[ inputs.chart_publish ]]
+    HELM_CHART_REPO: $[[ inputs.chart_repo ]]
+    HELM_CHART_CHANNEL: stable
+    HELM_REPO_USER: $[[ inputs.chart_repo_user ]]
+    HELM_REPO_PASSWORD: $[[ inputs.chart_repo_password ]]
+  script:
+    - echo "Using image $[[ inputs.image ]] on ${CI_COMMIT_REF_NAME}@${CI_COMMIT_SHORT_SHA}"
+    - !reference [.snippets, debian-core-tools]
+    - !reference [.snippets, alpine-core-tools]
+    - !reference [.snippets, helm-install]
+
+    - |
+      # Package
+      DEFAULT_HELM_CHART_VERSION=$(grep -w "version:" $HELM_CHART_PATH/Chart.yaml | awk '{print $2}' | tr -d '"')
+      DEFAULT_HELM_APP_VERSION=$(grep -w "appVersion:" $HELM_CHART_PATH/Chart.yaml | awk '{print $2}' | tr -d '"')
+      HELM_CHART_NAME=$(grep "name:" $HELM_CHART_PATH/Chart.yaml | awk '{print $2}' | tr -d '"')
+
+      if [ ! -z ${HELM_APP_VERSION+x} ]; then
+        HELM_APP_VERSION="${DEFAULT_HELM_APP_VERSION}"
+        echo "Explicit app version not set. Using ${HELM_APP_VERSION}."
+      fi
+
+      if [ ! -z ${HELM_CHART_VERSION+x} ]; then
+        HELM_CHART_VERSION="${DEFAULT_HELM_CHART_VERSION}"
+        echo "Explicit chart version not set. Using ${HELM_CHART_VERSION}."
+      fi
+
+      if [ ! -z ${HELM_VERSION_POSTFIX+x} ]; then
+        echo "Detechted PR Pipeline. Adding branch version postfix"
+        HELM_CHART_VERSION="${HELM_CHART_VERSION}-${HELM_VERSION_POSTFIX}"
+        HELM_VERSION_POSTFIX="-${HELM_VERSION_POSTFIX}"
+      fi
+
+      helm package --app-version $HELM_APP_VERSION --version $HELM_CHART_VERSION $HELM_CHART_PATH
+      ls -la *.tgz
+    - |
+      if [ "$HELM_CHART_PUBLISH" = "true" ]; then
+        echo "Will publish chart version ${HELM_CHART_VERSION} to ${HELM_CHART_REPO}"
+
+        if [[ "$HELM_CHART_REPO" == *"$CI_API_V4_URL"* ]]; then
+          echo "Publishing to Gitlab"
+          curl --silent --fail --request POST --user gitlab-ci-token:$CI_JOB_TOKEN --form "chart=@$HELM_CHART_NAME-$HELM_CHART_VERSION.tgz" "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/helm/api/$HELM_CHART_CHANNEL/charts"
+        else
+          echo "Publish to $HELM_CHART_REPO"
+          curl --silent --fail -u ${HELM_REPO_USER}:${HELM_REPO_PASSWORD} --upload-file $HELM_CHART_NAME-$HELM_CHART_VERSION.tgz $HELM_CHART_REPO
+        fi
+      fi
+    # Push via Helm
+    # - helm repo add --username gitlab-ci-token --password $CI_JOB_TOKEN $CI_PROJECT_NAME ${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/helm/$CHART_CHANNEL
+    # - helm cm-push $CI_PROJECT_NAME-$CHART_VERSION.tgz $CI_PROJECT_NAME
+  rules: $[[ inputs.rules ]]
+  artifacts:
+    paths: ["*.tgz"]
+    expire_in: 2 weeks
+    when: always
