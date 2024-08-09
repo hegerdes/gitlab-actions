@@ -182,7 +182,7 @@
         curl -sL --output /tmp/kubeconform.tar.gz \
           https://github.com/yannh/kubeconform/releases/download/${KUBECONFORM_VERSION-$KUBECONFORM_DEFAULT_VERSION}/kubeconform-linux-${ARCH-amd64}.tar.gz
         tar xzf /tmp/kubeconform.tar.gz -C /usr/local/bin/ --exclude={LICENSE,README.md}
-        rm tmp/kubeconform.tar.gz
+        rm /tmp/kubeconform.tar.gz
         chmod +x /usr/local/bin/kubeconform
       fi
       kubeconform -v
