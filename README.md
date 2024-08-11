@@ -6,23 +6,25 @@ This repo contains a collection of different [GotLab CI/CD Components](https://a
 
 Currently sported components are:
  * [Code Quality: pre-commit](https://gitlab.com/hegerdes/gitlab-actions/-/tree/main/templates/pre-commit.md)
- * [Container Build: Kaniko](https://gitlab.com/hegerdes/gitlab-actions/-/tree/main/templates/kaniko-build.md) - requires GitLab >v16.11
- * [Container Build: Buildah](https://gitlab.com/hegerdes/gitlab-actions/-/tree/main/templates/buildash-build.md) - requires GitLab >v16.11
  * [Build: Helm package](https://gitlab.com/hegerdes/gitlab-actions/-/tree/main/templates/helm-package.md)
+ * [Container Build: Kaniko](https://gitlab.com/hegerdes/gitlab-actions/-/tree/main/templates/kaniko-build.md)
+ * [Container Build: Buildah](https://gitlab.com/hegerdes/gitlab-actions/-/tree/main/templates/buildash-build.md)
  * [Deployment: Helm install/upgrade](https://gitlab.com/hegerdes/gitlab-actions/-/tree/main/templates/helm-install.md)
 
 Currently sported snippets are:
  * debian-core-tools
  * alpine-core-tools
  * terraform-install
+ * git-install
  * tflint-install
  * kubectl-install
  * helm-install
  * kubeseal-install
+ * kubeconform-install
  * kind-install
  * tailscale-install
  * minio-mc-install
- * yq-multi-install
+ * yq-by-mike-farah-install
  * azure-cli-install
  * aws-cli-install
 

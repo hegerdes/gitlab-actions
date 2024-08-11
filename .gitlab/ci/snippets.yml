@@ -145,6 +145,18 @@
         chmod +x /usr/local/bin/kind
       fi
       kind version
+  git-install:
+    - |
+      # Check if git is installed
+      if ! command -v git > /dev/null; then
+        echo "Installing git"
+      if command -v apt-get > /dev/null; then
+        apt-get update -qq > /dev/null
+        apt-get install -y -qq --no-install-recommends git > /dev/null
+      elif command -v apk > /dev/null; then
+        apk add git > /dev/null
+      fi
+      git version
   kubeseal-install:
     - |
       # Check if kubeseal is installed
