@@ -184,7 +184,7 @@
     - |
       # Check if kubeconform is installed
       if ! command -v kubeconform > /dev/null; then
-        echo "Installing kubeconform (by Mike Farah)"
+        echo "Installing kubeconform"
         echo "You can set the desired version via KUBECONFORM_VERSION. Default is latest"
         if [ "$(uname -m)" = "x86_64" ]; then
           ARCH=amd64

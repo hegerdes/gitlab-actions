@@ -81,7 +81,7 @@ $[[ inputs.job_name_prefix ]]:package:
       if [ "$[[ inputs.chart_lint ]]" = "true" ]; then
         echo "Running helm lint..."
         helm lint $HELM_CHART_PATH
-        if ! command -v kubeconform > /dev/null; then
+        if command -v kubeconform > /dev/null; then
           echo "Running kubeconform with args \$[[ inputs.kubeconform_args ]]\"..."
           helm template demo $HELM_CHART_PATH | kubeconform $[[ inputs.kubeconform_args ]]
         fi
