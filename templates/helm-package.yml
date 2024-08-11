@@ -22,6 +22,12 @@ spec:
     chart_publish:
       type: boolean
       default: true
+    chart_lint:
+      type: boolean
+      default: true
+    kubeconform_args:
+      type: string
+      default: -summary -ignore-missing-schemas
     chart_repo_user:
       type: string
       default: ""
@@ -56,20 +62,30 @@ $[[ inputs.job_name_prefix ]]:package:
     entrypoint: [""]
   stage: build
   variables:
-    HELM_APP_VERSION: $[[ inputs.chart_version ]]
-    HELM_CHART_VERSION: $[[ inputs.chart_version ]]
+    HELM_CHART_CHANNEL: stable
     HELM_CHART_PATH: $[[ inputs.chart ]]
+    HELM_APP_VERSION: $[[ inputs.app_version ]]
+    HELM_CHART_VERSION: $[[ inputs.chart_version ]]
     HELM_CHART_PUBLISH: $[[ inputs.chart_publish ]]
     HELM_CHART_REPO: $[[ inputs.chart_repo ]]
-    HELM_CHART_CHANNEL: stable
     HELM_REPO_USER: $[[ inputs.chart_repo_user ]]
     HELM_REPO_PASSWORD: $[[ inputs.chart_repo_password ]]
   script:
     - echo "Using image $[[ inputs.image ]] on ${CI_COMMIT_REF_NAME}@${CI_COMMIT_SHORT_SHA}"
     - !reference [.snippets, debian-core-tools]
     - !reference [.snippets, alpine-core-tools]
+    - !reference [.snippets, kubeconform-install]
     - !reference [.snippets, helm-install]
-
+    - |
+      # Lint & kubeconform chart
+      if [ "$[[ inputs.chart_lint ]]" = "true" ]; then
+        echo "Running helm lint..."
+        helm lint $HELM_CHART_PATH
+        if ! command -v kubeconform > /dev/null; then
+          echo "Running kubeconform with args \$[[ inputs.kubeconform_args ]]\"..."
+          helm template demo $HELM_CHART_PATH | kubeconform $[[ inputs.kubeconform_args ]]
+        fi
+      fi
     - |
       # Package
       DEFAULT_HELM_CHART_VERSION=$(grep -w "version:" $HELM_CHART_PATH/Chart.yaml | awk '{print $2}' | tr -d '"')
