@@ -41,14 +41,16 @@ variables:
   GL_K8S_AGENT_ID: 1103496
 
 snippets:
-  image: debian:bookworm-slim
+  image: $IMAGE
   tags: [$RUNNER]
   variables:
     GIT_STRATEGY: none
   parallel:
     matrix:
       - RUNNER: saas-linux-small-amd64
+        IMAGE: ["debian:bookworm-slim", "alpine"]
       - RUNNER: saas-linux-medium-arm64
+        IMAGE: ["debian:bookworm-slim", "alpine"]
   script:
     - !reference [.snippets, debian-core-tools]
     - !reference [.snippets, alpine-core-tools]
