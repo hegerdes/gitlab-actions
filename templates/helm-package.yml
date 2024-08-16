@@ -49,6 +49,7 @@ spec:
           when: never
         # Add the job to main branch pipelines.
         - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+        # Add the job to tag pipelines.
         - if: $CI_COMMIT_TAG
           variables:
             HELM_CHART_VERSION: $CI_COMMIT_TAG
@@ -82,7 +83,7 @@ $[[ inputs.job_name_prefix ]]:package:
         echo "Running helm lint..."
         helm lint $HELM_CHART_PATH
         if command -v kubeconform > /dev/null; then
-          echo "Running kubeconform with args \$[[ inputs.kubeconform_args ]]\"..."
+          echo "Running kubeconform with args: \"$[[ inputs.kubeconform_args ]]\"..."
           helm template demo $HELM_CHART_PATH | kubeconform $[[ inputs.kubeconform_args ]]
         fi
       fi
