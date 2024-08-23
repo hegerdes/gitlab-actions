@@ -23,6 +23,20 @@
       else
         echo "The apk package manager does not exist. Skipping core tool install."
       fi
+  openssl-install:
+    - |
+      # Check if openssl is installed
+      if ! command -v kubectl > /dev/null; then
+        echo "Installing openssl"
+        if command -v apt-get > /dev/null; then
+          apt-get update -qq > /dev/null
+          apt-get install -y -qq --no-install-recommends openssl > /dev/null
+        fi
+        if command -v apk > /dev/null; then
+          apk add --no-cache openssl > /dev/null
+        fi
+      fi
+      openssl version
   kubectl-install:
     - |
       # Check if kubectl is installed
