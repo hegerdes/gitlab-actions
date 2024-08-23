@@ -54,6 +54,7 @@ snippets:
   script:
     - !reference [.snippets, debian-core-tools]
     - !reference [.snippets, alpine-core-tools]
+    - !reference [.snippets, openssl-install]
     - !reference [.snippets, git-install]
     - !reference [.snippets, kubectl-install]
     - !reference [.snippets, kubeseal-install]
