@@ -2,7 +2,7 @@ spec:
   inputs:
     as_job:
       type: string
-      default: buildah-build
+      default: BUILDAH:build
     stage:
       type: string
       default: build

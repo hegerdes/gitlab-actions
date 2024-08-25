@@ -21,7 +21,7 @@ The template should work without modifications but you can customize the templat
 
 | Input                       | Default value                              | Description                                                                                                                  |
 | --------------------------- | ------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------- |
-| `as_job`                    | `kaniko_build`                             | The name of the job that gets imported. Use ".my_job" to include as template                                                 |
+| `as_job`                    | `KANIKO:build`                             | The name of the job that gets imported. Use ".my_job" to include as template                                                 |
 | `stage`                     | `build`                                    | The stage where you want the job to be added                                                                                 |
 | `build_image`               | `gcr.io/kaniko-project/executor:debug`     | The Docker image of kaniko                                                                                                   |
 | `push`                      | `true`                                     | When set to `true` the image will be pushed to the default registry. Set to `false` to only build without pushing the image. |

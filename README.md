@@ -7,6 +7,7 @@ This repo contains a collection of different [GotLab CI/CD Components](https://a
 Currently sported components are:
  * [Code Quality: pre-commit](https://gitlab.com/hegerdes/gitlab-actions/-/tree/main/templates/pre-commit.md)
  * [Build: Helm package](https://gitlab.com/hegerdes/gitlab-actions/-/tree/main/templates/helm-package.md)
+ * [Security: Trivy container scan](https://gitlab.com/hegerdes/gitlab-actions/-/tree/main/templates/trivy-container-scan.md)
  * [Container Build: Kaniko](https://gitlab.com/hegerdes/gitlab-actions/-/tree/main/templates/kaniko-build.md)
  * [Container Build: Buildah](https://gitlab.com/hegerdes/gitlab-actions/-/tree/main/templates/buildash-build.md)
  * [Deployment: Helm install/upgrade](https://gitlab.com/hegerdes/gitlab-actions/-/tree/main/templates/helm-install.md)
@@ -14,6 +15,7 @@ Currently sported components are:
 Currently sported snippets are:
  * debian-core-tools
  * alpine-core-tools
+ * openssl-install
  * terraform-install
  * git-install
  * tflint-install

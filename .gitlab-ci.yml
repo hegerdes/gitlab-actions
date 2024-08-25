@@ -81,7 +81,7 @@ pre-commit:
       - RUNNER: saas-linux-small-amd64
       - RUNNER: saas-linux-medium-arm64
 
-buildah-build:
+BUILDAH:build:
   tags: [$RUNNER]
   # Multiple pushes may cause race condition. Retry twice
   retry: 2
@@ -90,7 +90,7 @@ buildah-build:
       - RUNNER: saas-linux-small-amd64
       - RUNNER: saas-linux-medium-arm64
 
-kaniko-build:
+KANIKO:build:
   tags: [$RUNNER]
   # Multiple pushes may cause race condition. Retry twice
   retry: 2
