@@ -2,12 +2,14 @@
 stages:
   - test
   - build
+  - scan
   - deploy
   - release
 
 include:
   - local: .gitlab/ci/snippets.yml
   - local: .gitlab/ci/rules.yml
+  - component: $CI_SERVER_HOST/$CI_PROJECT_PATH/trivy-container-scan@$CI_COMMIT_SHA
   - component: $CI_SERVER_HOST/$CI_PROJECT_PATH/kaniko-build@$CI_COMMIT_SHA
     inputs:
       context: $CI_PROJECT_DIR/tests
@@ -92,6 +94,13 @@ kaniko-build:
   tags: [$RUNNER]
   # Multiple pushes may cause race condition. Retry twice
   retry: 2
+  parallel:
+    matrix:
+      - RUNNER: saas-linux-small-amd64
+      - RUNNER: saas-linux-medium-arm64
+
+TRIVY:container-scan:
+  tags: [$RUNNER]
   parallel:
     matrix:
       - RUNNER: saas-linux-small-amd64
