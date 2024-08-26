@@ -46,6 +46,10 @@ my-kaniko-build:
   extends: .my-kaniko-build
 ```
 
+## Releases
+All releases follow the [semantic versioning](https://semver.org/) schema. So only major version bumps should include breaking changes. The `main` branch is **NOT** stable and may have broken components. Use a fixed tag or fork this repo if you dan't want your CI to break unexpectedly.  
+Releases are generated with CI and contain all mentionable changes.
+
 ## Contribute
 
 Feel free to open a issue or a PR. Any new CI tasks must have tests for them and must run on amd64 and arm64.
