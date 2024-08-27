@@ -100,7 +100,7 @@
         if echo "${TERRAFORM_VERSION}" | grep -q "v"; then
           TERRAFORM_VERSION="${TERRAFORM_VERSION:1}"
         fi
-        curl -sL --output /tmp/terraform.zip "https://releases.hashicorp.com/terraform/${TERRFORM_VERSION}/terraform_${TERRFORM_VERSION}_linux_${ARCH-amd64}.zip"
+        curl -sL --output /tmp/terraform.zip "https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_${ARCH-amd64}.zip"
         unzip /tmp/terraform.zip -d /usr/bin/ > /dev/null
       fi
       terraform --version
