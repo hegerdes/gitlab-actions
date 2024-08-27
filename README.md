@@ -20,6 +20,7 @@ Currently sported snippets are:
  * git-install
  * tflint-install
  * kubectl-install
+ * cosign-install
  * helm-install
  * kubeseal-install
  * kubeconform-install

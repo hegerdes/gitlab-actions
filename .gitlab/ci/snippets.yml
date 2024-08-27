@@ -84,9 +84,9 @@
   terraform-install:
     - |
       # Check if terraform is installed
-      if ! command -v terrafrom > /dev/null; then
+      if ! command -v terraform > /dev/null; then
         echo "Installing terraform!"
-        echo "You can set the desired version via TERRFORM_VERSION. Default is latest"
+        echo "You can set the desired version via TERRAFORM_VERSION. Default is latest"
         if [ "$(uname -m)" = "x86_64" ]; then
           ARCH=amd64
         elif [ "$(uname -m)" = "aarch64" ]; then
@@ -94,16 +94,35 @@
         else
           echo "Unknown system arch. Default to amd64"
         fi
-        TERRFORM_DEFAULT_VERSION=$(curl -sL https://api.github.com/repos/hashicorp/terraform/releases/latest | jq -r .name)
-        TERRFORM_VERSION="${TERRFORM_VERSION-$TERRFORM_DEFAULT_VERSION}"
+        TERRAFORM_DEFAULT_VERSION=$(curl -sL https://api.github.com/repos/hashicorp/terraform/releases/latest | jq -r .name)
+        TERRAFORM_VERSION="${TERRAFORM_VERSION-$TERRAFORM_DEFAULT_VERSION}"
         # Fix version beginning with "v"
-        if echo "${TERRFORM_VERSION}" | grep -q "v"; then
-          TERRFORM_VERSION="${TERRFORM_VERSION:1}"
+        if echo "${TERRAFORM_VERSION}" | grep -q "v"; then
+          TERRAFORM_VERSION="${TERRAFORM_VERSION:1}"
         fi
         curl -sL --output /tmp/terraform.zip "https://releases.hashicorp.com/terraform/${TERRFORM_VERSION}/terraform_${TERRFORM_VERSION}_linux_${ARCH-amd64}.zip"
         unzip /tmp/terraform.zip -d /usr/bin/ > /dev/null
       fi
       terraform --version
+  cosign-install:
+    - |
+      # Check if cosign is installed
+      if ! command -v cosign > /dev/null; then
+        echo "Installing cosign!"
+        echo "You can set the desired version via COSIGN_VERSION. Default is latest"
+        if [ "$(uname -m)" = "x86_64" ]; then
+          ARCH=amd64
+        elif [ "$(uname -m)" = "aarch64" ]; then
+          ARCH=arm64
+        else
+          echo "Unknown system arch. Default to amd64"
+        fi
+        COSIGN_DEFAULT_VERSION=$(curl -sL https://api.github.com/repos/sigstore/cosign/releases/latest | jq -r .name)
+        COSIGN_VERSION="${COSIGN_VERSION-$COSIGN_DEFAULT_VERSION}"
+        curl -sL --output /usr/local/bin/cosign "https://github.com/sigstore/cosign/releases/download/${COSIGN_VERSION}/cosign-linux-${ARCH-amd64}"
+        chmod +x /usr/local/bin/cosign
+      fi
+      cosign version
   tflint-install:
     - |
       # Check if tflint is installed
