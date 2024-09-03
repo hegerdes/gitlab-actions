@@ -2,7 +2,7 @@
 ![CI/CD](https://gitlab.com/hegerdes/gitlab-actions/badges/main/pipeline.svg)
 ![Release](https://gitlab.com/hegerdes/gitlab-actions/-/badges/release.svg)
 
-This repo contains a collection of different [GotLab CI/CD Components](https://about.gitlab.com/blog/2023/12/21/introducing-the-gitlab-ci-cd-catalog-beta/) and snippets to be included in the script section of a job.
+This repo contains a collection of different [GitLab CI/CD Components](https://about.gitlab.com/blog/2023/12/21/introducing-the-gitlab-ci-cd-catalog-beta/) and snippets to be included in the script section of a job.
 
 Currently sported components are:
  * [Code Quality: pre-commit](https://gitlab.com/hegerdes/gitlab-actions/-/tree/main/templates/pre-commit.md)
