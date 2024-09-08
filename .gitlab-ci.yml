@@ -55,7 +55,7 @@ snippets:
     matrix:
       - RUNNER: saas-linux-small-amd64
         IMAGE: ["debian:bookworm-slim", "alpine"]
-      - RUNNER: saas-linux-medium-arm64
+      - RUNNER: hegerdes-linux-arm64
         IMAGE: ["debian:bookworm-slim", "alpine"]
   script:
     - !reference [.snippets, debian-core-tools]
@@ -85,7 +85,7 @@ pre-commit:
   parallel:
     matrix:
       - RUNNER: saas-linux-small-amd64
-      - RUNNER: saas-linux-medium-arm64
+      - RUNNER: hegerdes-linux-arm64
 
 BUILDAH:build:
   tags: [$RUNNER]
@@ -94,7 +94,7 @@ BUILDAH:build:
   parallel:
     matrix:
       - RUNNER: saas-linux-small-amd64
-      - RUNNER: saas-linux-medium-arm64
+      - RUNNER: hegerdes-linux-arm64
 
 KANIKO:build:
   tags: [$RUNNER]
@@ -103,21 +103,21 @@ KANIKO:build:
   parallel:
     matrix:
       - RUNNER: saas-linux-small-amd64
-      - RUNNER: saas-linux-medium-arm64
+      - RUNNER: hegerdes-linux-arm64
 
 TRIVY:container-scan:
   tags: [$RUNNER]
   parallel:
     matrix:
       - RUNNER: saas-linux-small-amd64
-      - RUNNER: saas-linux-medium-arm64
+      - RUNNER: hegerdes-linux-arm64
 
 HELM:package:
   tags: [$RUNNER]
   parallel:
     matrix:
       - RUNNER: saas-linux-small-amd64
-      - RUNNER: saas-linux-medium-arm64
+      - RUNNER: hegerdes-linux-arm64
 
 HELM:install:
   tags: [$RUNNER]
@@ -127,7 +127,7 @@ HELM:install:
   parallel:
     matrix:
       - RUNNER: saas-linux-small-amd64
-      - RUNNER: saas-linux-medium-arm64
+      - RUNNER: hegerdes-linux-arm64
   # before_script:
   #   - !reference [.snippets, debian-core-tools]
   #   - !reference [.snippets, kubectl-install]
