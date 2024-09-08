@@ -265,10 +265,28 @@
         else
           echo "Unknown system arch. Default to amd64"
         fi
-        curl -sL https://dl.min.io/client/mc/release/linux-${ARCH}/mc -o /usr/local/bin/mc
+        curl -sL https://dl.min.io/client/mc/release/linux-${ARCH-amd64}/mc -o /usr/local/bin/mc
         chmod +x /usr/local/bin/mc
       fi
       mc --version
+  talosctl-install:
+    - |
+      # Check if talosctl is installed
+      if ! command -v talosctl > /dev/null; then
+        echo "Installing talosctl"
+        if [ "$(uname -m)" = "x86_64" ]; then
+          ARCH=amd64
+        elif [ "$(uname -m)" = "aarch64" ]; then
+          ARCH=arm64
+        else
+          echo "Unknown system arch. Default to amd64"
+        fi
+        TALOSCTL_DEFAULT_VERSION=$(curl -sL https://api.github.com/repos/siderolabs/talos/releases/latest | jq -r .tag_name)
+        TAILSCALE_VERSION=${TALOSCTL_VERSION-$TALOSCTL_DEFAULT_VERSION}
+        curl -sL https://github.com/siderolabs/talos/releases/download/v1.8.0-alpha.2/talosctl-linux-${ARCH-amd64} -o /usr/local/bin/talosctl
+        chmod +x /usr/local/bin/talosctl
+      fi
+      talosctl version --client
   tailscale-install:
     - |
       # Check if tailscale is installed

@@ -21,6 +21,7 @@ Currently sported snippets are:
  * tflint-install
  * kubectl-install
  * cosign-install
+ * talosctl-install
  * helm-install
  * kubeseal-install
  * kubeconform-install
