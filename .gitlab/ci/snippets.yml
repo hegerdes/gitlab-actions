@@ -282,8 +282,8 @@
           echo "Unknown system arch. Default to amd64"
         fi
         TALOSCTL_DEFAULT_VERSION=$(curl -sL https://api.github.com/repos/siderolabs/talos/releases/latest | jq -r .tag_name)
-        TAILSCALE_VERSION=${TALOSCTL_VERSION-$TALOSCTL_DEFAULT_VERSION}
-        curl -sL https://github.com/siderolabs/talos/releases/download/v1.8.0-alpha.2/talosctl-linux-${ARCH-amd64} -o /usr/local/bin/talosctl
+        TALOSCTL_VERSION=${TALOSCTL_VERSION-$TALOSCTL_DEFAULT_VERSION}
+        curl -sL https://github.com/siderolabs/talos/releases/download/${TALOSCTL_VERSION}/talosctl-linux-${ARCH-amd64} -o /usr/local/bin/talosctl
         chmod +x /usr/local/bin/talosctl
       fi
       talosctl version --client
