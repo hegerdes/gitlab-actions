@@ -91,6 +91,10 @@ BUILDAH:build:
   tags: [$RUNNER]
   # Multiple pushes may cause race condition. Retry twice
   retry: 2
+  variables:
+    STORAGE_DRIVER: vfs
+    BUILDAH_FORMAT: docker
+    BUILDAH_ISOLATION: chroot
   parallel:
     matrix:
       - RUNNER: saas-linux-small-amd64

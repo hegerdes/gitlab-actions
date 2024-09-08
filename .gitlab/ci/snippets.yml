@@ -274,6 +274,7 @@
       # Check if talosctl is installed
       if ! command -v talosctl > /dev/null; then
         echo "Installing talosctl"
+        echo "You can set the desired version via TALOSCTL_VERSION. Default is latest"
         if [ "$(uname -m)" = "x86_64" ]; then
           ARCH=amd64
         elif [ "$(uname -m)" = "aarch64" ]; then
@@ -292,6 +293,7 @@
       # Check if tailscale is installed
       if ! command -v tailscale > /dev/null; then
         echo "Installing tailscale"
+        echo "You can set the desired version via TAILSCALE_VERSION. Default is latest"
         if [ "$(uname -m)" = "x86_64" ]; then
           ARCH=amd64
         elif [ "$(uname -m)" = "aarch64" ]; then
