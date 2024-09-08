@@ -306,7 +306,6 @@
           TAILSCALE_VERSION="${TAILSCALE_VERSION:1}"
         fi
         FILE_PREFIX="tailscale_${TAILSCALE_VERSION}_${ARCH-amd64}"
-        curl -sL https://pkgs.tailscale.com/stable/${FILE_PREFIX}.tgz -v -o -
         curl -sL https://pkgs.tailscale.com/stable/${FILE_PREFIX}.tgz -o tailscale.tar.gz
         tar -xzf tailscale.tar.gz --strip-components=1 -C /usr/local/bin/ $FILE_PREFIX/tailscale $FILE_PREFIX/tailscaled
         rm tailscale.tar.gz
