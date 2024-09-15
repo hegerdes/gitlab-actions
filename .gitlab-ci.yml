@@ -49,6 +49,8 @@ variables:
 snippets:
   image: $IMAGE
   tags: [$RUNNER]
+  timeout: 10m
+  retry: 1
   variables:
     GIT_STRATEGY: none
   parallel:
