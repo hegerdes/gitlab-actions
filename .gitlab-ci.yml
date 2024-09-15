@@ -55,7 +55,7 @@ snippets:
     GIT_STRATEGY: none
   parallel:
     matrix:
-      - RUNNER: saas-linux-small-amd64
+      - RUNNER: saas-linux-medium-amd64
         IMAGE: ["debian:bookworm-slim", "alpine"]
       - RUNNER: hegerdes-linux-arm64
         IMAGE: ["debian:bookworm-slim", "alpine"]
