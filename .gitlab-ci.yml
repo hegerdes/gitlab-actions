@@ -76,7 +76,6 @@ snippets:
     - !reference [.snippets, tflint-install]
     - !reference [.snippets, tailscale-install]
     - !reference [.snippets, minio-mc-install]
-    - !reference [.snippets, az-copy-install]
     - !reference [.snippets, yq-by-mike-farah-install]
     - !reference [.snippets, azure-cli-install]
     - !reference [.snippets, aws-cli-install]
