@@ -72,7 +72,7 @@ snippets:
     - !reference [.snippets, talosctl-install]
     - !reference [.snippets, helm-install]
     - !reference [.snippets, kind-install]
-    - !reference [.snippets, mimikube-install]
+    - !reference [.snippets, minikube-install]
     - !reference [.snippets, argocd-cli-install]
     - !reference [.snippets, terraform-install]
     - !reference [.snippets, tflint-install]

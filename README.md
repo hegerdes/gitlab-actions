@@ -4,7 +4,7 @@
 
 This repo contains a collection of different [GitLab CI/CD Components](https://about.gitlab.com/blog/2023/12/21/introducing-the-gitlab-ci-cd-catalog-beta/) and snippets to be included in the script section of a job.
 
-Currently sported components are:
+Currently supported components are:
  * [Code Quality: pre-commit](https://gitlab.com/hegerdes/gitlab-actions/-/tree/main/templates/pre-commit.md)
  * [Build: Helm package](https://gitlab.com/hegerdes/gitlab-actions/-/tree/main/templates/helm-package.md)
  * [Security: Trivy container scan](https://gitlab.com/hegerdes/gitlab-actions/-/tree/main/templates/trivy-container-scan.md)
@@ -12,7 +12,7 @@ Currently sported components are:
  * [Container Build: Buildah](https://gitlab.com/hegerdes/gitlab-actions/-/tree/main/templates/buildash-build.md)
  * [Deployment: Helm install/upgrade](https://gitlab.com/hegerdes/gitlab-actions/-/tree/main/templates/helm-install.md)
 
-Currently sported snippets are:
+Currently supported snippets are:
  * debian-core-tools
  * alpine-core-tools
  * openssl-install
@@ -24,7 +24,7 @@ Currently sported snippets are:
  * talosctl-install
  * skopeo-install
  * az-copy-install
- * mimikube-install
+ * minikube-install
  * argocd-cli-install
  * helm-install
  * kubeseal-install
