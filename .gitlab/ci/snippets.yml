@@ -70,7 +70,7 @@
         if ! echo "${KUBECTL_VERSION}" | grep -q "v"; then
           KUBECTL_VERSION="v${KUBECTL_VERSION}"
         fi
-        curl -sL --output /usr/bin/kubectl "https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/${ARCH-amd64}/kubectl"
+        curl -sL --fail --output /usr/bin/kubectl "https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/${ARCH-amd64}/kubectl"
         chmod +x /usr/bin/kubectl
       fi
       kubectl version --client
@@ -114,7 +114,7 @@
         if echo "${TERRAFORM_VERSION}" | grep -q "v"; then
           TERRAFORM_VERSION="${TERRAFORM_VERSION:1}"
         fi
-        curl -sL --output /tmp/terraform.zip "https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_${ARCH-amd64}.zip"
+        curl -sL --fail --output /tmp/terraform.zip "https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_${ARCH-amd64}.zip"
         unzip /tmp/terraform.zip -d /usr/bin/ > /dev/null
       fi
       terraform --version
@@ -133,7 +133,7 @@
         fi
         COSIGN_DEFAULT_VERSION=$(curl -sL https://api.github.com/repos/sigstore/cosign/releases/latest | jq -r .name)
         COSIGN_VERSION="${COSIGN_VERSION-$COSIGN_DEFAULT_VERSION}"
-        curl -sL --output /usr/local/bin/cosign "https://github.com/sigstore/cosign/releases/download/${COSIGN_VERSION}/cosign-linux-${ARCH-amd64}"
+        curl -sL --fail --output /usr/local/bin/cosign "https://github.com/sigstore/cosign/releases/download/${COSIGN_VERSION}/cosign-linux-${ARCH-amd64}"
         chmod +x /usr/local/bin/cosign
       fi
       cosign version
@@ -152,7 +152,7 @@
         TFLINT_SYSTEM_TYPE="linux_${ARCH-amd64}.zip"
         TFLINT_RELEASES="https://api.github.com/repos/terraform-linters/tflint/releases/latest"
         TFLINT_URL=$(curl -sL $TFLINT_RELEASES | jq -r --arg term $TFLINT_SYSTEM_TYPE '.assets[] | select(.name | test($term)).browser_download_url')
-        curl -sL --output /tmp/tflint.zip $TFLINT_URL
+        curl -sL --fail --output /tmp/tflint.zip $TFLINT_URL
         unzip /tmp/tflint.zip -d /usr/bin/ > /dev/null
       fi
       tflint --version
@@ -170,7 +170,7 @@
           echo "Unknown system arch. Default to amd64"
         fi
         HELM_DEFAULT_VERSION=$(curl -sL https://api.github.com/repos/helm/helm/releases/latest | jq -r .tag_name)
-        curl -sL --output /tmp/helm.tar.gz https://get.helm.sh/helm-${HELM_VERSION-$HELM_DEFAULT_VERSION}-linux-${ARCH-amd64}.tar.gz
+        curl -sL --fail --output /tmp/helm.tar.gz https://get.helm.sh/helm-${HELM_VERSION-$HELM_DEFAULT_VERSION}-linux-${ARCH-amd64}.tar.gz
         tar xzf /tmp/helm.tar.gz -C /usr/local/bin/ --strip-components=1 --exclude={LICENSE,README.md}
       fi
       helm version
@@ -188,7 +188,7 @@
           echo "Unknown system arch. Default to amd64"
         fi
         KIND_DEFAULT_VERSION=$(curl -sL https://api.github.com/repos/kubernetes-sigs/kind/releases/latest | jq -r .tag_name)
-        curl -sL --output /usr/local/bin/kind https://github.com/kubernetes-sigs/kind/releases/download/${KIND_VERSION-$KIND_DEFAULT_VERSION}/kind-linux-${ARCH-amd64}
+        curl -sL --fail --output /usr/local/bin/kind https://github.com/kubernetes-sigs/kind/releases/download/${KIND_VERSION-$KIND_DEFAULT_VERSION}/kind-linux-${ARCH-amd64}
         chmod +x /usr/local/bin/kind
       fi
       kind version
@@ -206,7 +206,7 @@
           echo "Unknown system arch. Default to amd64"
         fi
         MINIKUBE_DEFAULT_VERSION=$(curl -sL https://api.github.com/repos/kubernetes/minikube/releases/latest | jq -r .tag_name)
-        curl -sL --output /usr/local/bin/minikube https://github.com/kubernetes/minikube/releases/download/${MINIKUBE_VERSION-$MINIKUBE_DEFAULT_VERSION}/minikube-linux-${ARCH-amd64}
+        curl -sL --fail --output /usr/local/bin/minikube https://github.com/kubernetes/minikube/releases/download/${MINIKUBE_VERSION-$MINIKUBE_DEFAULT_VERSION}/minikube-linux-${ARCH-amd64}
         chmod +x /usr/local/bin/minikube
       fi
       minikube version
@@ -224,7 +224,7 @@
           echo "Unknown system arch. Default to amd64"
         fi
         ARGO_DEFAULT_VERSION=$(curl -sL https://api.github.com/repos/argoproj/argo-cd/releases/latest | jq -r .tag_name)
-        curl -sL --output /usr/local/bin/argocd https://github.com/argoproj/argo-cd/releases/download/${ARGO_VERSION-$ARGO_DEFAULT_VERSION}/argocd-linux-${ARCH-amd64}
+        curl -sL --fail --output /usr/local/bin/argocd https://github.com/argoproj/argo-cd/releases/download/${ARGO_VERSION-$ARGO_DEFAULT_VERSION}/argocd-linux-${ARCH-amd64}
         chmod +x /usr/local/bin/argocd
       fi
       argocd version --client
@@ -257,7 +257,7 @@
           echo "Unknown system arch. Default to amd64"
         fi
         KUBESEAL_DEFAULT_VERSION=$(curl -sL https://api.github.com/repos/bitnami-labs/sealed-secrets/releases/latest | jq -r .tag_name | cut -c 2-)
-        curl -sL --output kubeseal.tar.gz "https://github.com/bitnami-labs/sealed-secrets/releases/download/v${KUBESEAL_VERSION-$KUBESEAL_DEFAULT_VERSION}/kubeseal-${KUBESEAL_VERSION-$KUBESEAL_DEFAULT_VERSION}-linux-${ARCH-amd64}.tar.gz"
+        curl -sL --fail --output kubeseal.tar.gz "https://github.com/bitnami-labs/sealed-secrets/releases/download/v${KUBESEAL_VERSION-$KUBESEAL_DEFAULT_VERSION}/kubeseal-${KUBESEAL_VERSION-$KUBESEAL_DEFAULT_VERSION}-linux-${ARCH-amd64}.tar.gz"
         tar -xzf kubeseal.tar.gz -C /usr/bin kubeseal
         rm kubeseal.tar.gz
         chmod +x /usr/bin/kubeseal
@@ -277,7 +277,7 @@
           echo "Unknown system arch. Default to amd64"
         fi
         KUBECONFORM_DEFAULT_VERSION=$(curl -sL https://api.github.com/repos/yannh/kubeconform/releases/latest | jq -r .tag_name)
-        curl -sL --output /tmp/kubeconform.tar.gz \
+        curl -sL --fail --output /tmp/kubeconform.tar.gz \
           https://github.com/yannh/kubeconform/releases/download/${KUBECONFORM_VERSION-$KUBECONFORM_DEFAULT_VERSION}/kubeconform-linux-${ARCH-amd64}.tar.gz
         tar xzf /tmp/kubeconform.tar.gz -C /usr/local/bin/ --exclude={LICENSE,README.md}
         rm /tmp/kubeconform.tar.gz
@@ -298,7 +298,7 @@
           echo "Unknown system arch. Default to amd64"
         fi
         YQ_DEFAULT_VERSION=$(curl -sL https://api.github.com/repos/mikefarah/yq/releases/latest | jq -r .tag_name)
-        curl -sL --output /usr/bin/yq \
+        curl -sL --fail --output /usr/bin/yq \
           https://github.com/mikefarah/yq/releases/download/${YQ_VERSION-$YQ_DEFAULT_VERSION}/yq_linux_${ARCH-amd64}
         chmod +x /usr/bin/yq
       fi
