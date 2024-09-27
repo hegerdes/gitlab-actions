@@ -24,6 +24,8 @@ Currently sported snippets are:
  * talosctl-install
  * skopeo-install
  * az-copy-install
+ * mimikube-install
+ * argocd-cli-install
  * helm-install
  * kubeseal-install
  * kubeconform-install
