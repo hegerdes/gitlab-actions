@@ -137,7 +137,6 @@
         if echo "${OPENTOFU_VERSION}" | grep -q "v"; then
           OPENTOFU_VERSION="${OPENTOFU_VERSION:1}"
         fi
-        echo "https://github.com/opentofu/opentofu/releases/download/v${OPENTOFU_VERSION}/tofu_${OPENTOFU_VERSION}_linux_${ARCH-amd64}.tar.gz"
         curl -sL --fail --output /tmp/tofu.tar.gz "https://github.com/opentofu/opentofu/releases/download/v${OPENTOFU_VERSION}/tofu_${OPENTOFU_VERSION}_linux_${ARCH-amd64}.tar.gz"
         tar -xzf /tmp/tofu.tar.gz -C /usr/local/bin/ --exclude={LICENSE,README.md,CHANGELOG.md}
         rm /tmp/tofu.tar.gz
