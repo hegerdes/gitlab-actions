@@ -118,6 +118,31 @@
         unzip /tmp/terraform.zip -d /usr/bin/ > /dev/null
       fi
       terraform --version
+  opentofu-install:
+    - |
+      # Check if opentofu is installed
+      if ! command -v tofu > /dev/null; then
+        echo "Installing opentofu!"
+        echo "You can set the desired version via OPENTOFU_VERSION. Default is latest"
+        if [ "$(uname -m)" = "x86_64" ]; then
+          ARCH=amd64
+        elif [ "$(uname -m)" = "aarch64" ]; then
+          ARCH=arm64
+        else
+          echo "Unknown system arch. Default to amd64"
+        fi
+        TERRAFORM_DEFAULT_VERSION=$(curl -sL https://api.github.com/repos/opentofu/opentofu/releases/latest | jq -r .name)
+        OPENTOFU_VERSION="${OPENTOFU_VERSION-$TERRAFORM_DEFAULT_VERSION}"
+        # Fix version beginning with "v"
+        if echo "${OPENTOFU_VERSION}" | grep -q "v"; then
+          OPENTOFU_VERSION="${OPENTOFU_VERSION:1}"
+        fi
+        echo "https://github.com/opentofu/opentofu/releases/download/v${OPENTOFU_VERSION}/tofu_${OPENTOFU_VERSION}_linux_${ARCH-amd64}.tar.gz"
+        curl -sL --fail --output /tmp/tofu.tar.gz "https://github.com/opentofu/opentofu/releases/download/v${OPENTOFU_VERSION}/tofu_${OPENTOFU_VERSION}_linux_${ARCH-amd64}.tar.gz"
+        tar -xzf /tmp/tofu.tar.gz -C /usr/local/bin/ --exclude={LICENSE,README.md,CHANGELOG.md}
+        rm /tmp/tofu.tar.gz
+      fi
+      tofu --version
   cosign-install:
     - |
       # Check if cosign is installed
@@ -171,7 +196,7 @@
         fi
         HELM_DEFAULT_VERSION=$(curl -sL https://api.github.com/repos/helm/helm/releases/latest | jq -r .tag_name)
         curl -sL --fail --output /tmp/helm.tar.gz https://get.helm.sh/helm-${HELM_VERSION-$HELM_DEFAULT_VERSION}-linux-${ARCH-amd64}.tar.gz
-        tar xzf /tmp/helm.tar.gz -C /usr/local/bin/ --strip-components=1 --exclude={LICENSE,README.md}
+        tar -xzf /tmp/helm.tar.gz -C /usr/local/bin/ --strip-components=1 --exclude={LICENSE,README.md}
       fi
       helm version
   kind-install:
@@ -279,7 +304,7 @@
         KUBECONFORM_DEFAULT_VERSION=$(curl -sL https://api.github.com/repos/yannh/kubeconform/releases/latest | jq -r .tag_name)
         curl -sL --fail --output /tmp/kubeconform.tar.gz \
           https://github.com/yannh/kubeconform/releases/download/${KUBECONFORM_VERSION-$KUBECONFORM_DEFAULT_VERSION}/kubeconform-linux-${ARCH-amd64}.tar.gz
-        tar xzf /tmp/kubeconform.tar.gz -C /usr/local/bin/ --exclude={LICENSE,README.md}
+        tar -xzf /tmp/kubeconform.tar.gz -C /usr/local/bin/ --exclude={LICENSE,README.md}
         rm /tmp/kubeconform.tar.gz
         chmod +x /usr/local/bin/kubeconform
       fi

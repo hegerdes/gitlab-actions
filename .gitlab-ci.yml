@@ -75,6 +75,7 @@ snippets:
     - !reference [.snippets, minikube-install]
     - !reference [.snippets, argocd-cli-install]
     - !reference [.snippets, terraform-install]
+    - !reference [.snippets, opentofu-install]
     - !reference [.snippets, tflint-install]
     - !reference [.snippets, tailscale-install]
     - !reference [.snippets, minio-mc-install]

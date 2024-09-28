@@ -16,6 +16,7 @@ Currently supported snippets are:
  * debian-core-tools
  * alpine-core-tools
  * openssl-install
+ * opentofu-install
  * terraform-install
  * git-install
  * tflint-install
