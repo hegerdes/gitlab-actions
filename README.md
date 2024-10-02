@@ -17,6 +17,7 @@ Currently supported snippets are:
  * alpine-core-tools
  * openssl-install
  * opentofu-install
+ * jq-install
  * terraform-install
  * git-install
  * tflint-install
