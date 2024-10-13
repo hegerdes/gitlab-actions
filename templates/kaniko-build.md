@@ -29,6 +29,7 @@ The template should work without modifications but you can customize the templat
 | `image_tags`                | [`$CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG`] | Array of the image tags to build.                                                                                            |
 | `context`                   | `$CI_PROJECT_DIR`                          | The kaniko/docker build context.                                                                                             |
 | `dockerfile`                | `$CI_PROJECT_DIR/Dockerfile`               | The path to the Dockerfile.                                                                                                  |
+| `add_image_arch_postfix`    | `false`                                    | If the container image arch should be postfixed to the image tag.                                                            |
 | `authors`                   | `$CI_COMMIT_AUTHOR`                        | For OCI image label: Name of the image author(s).                                                                            |
 | `source_url`                | `$CI_PROJECT_URL`                          | For OCI image label: Url of the source code.                                                                                 |
 | `project_url`               | `$CI_PROJECT_URL`                          | For OCI image label: Url of the project.                                                                                     |
@@ -37,6 +38,7 @@ The template should work without modifications but you can customize the templat
 | `description`               | `$CI_PROJECT_DESCRIPTION`                  | For OCI image label: Description.                                                                                            |
 | `vendor`                    | `UNKNOWN`                                  | For OCI image label: Vendor name.                                                                                            |
 | `license`                   | `UNKNOWN`                                  | For OCI image label: License.                                                                                                |
+| `rules`                     | *Default MR rules + Tags*                  | The rules when the job runs                                                                                                  |
 
 ### Variables
 

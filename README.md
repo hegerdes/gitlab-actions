@@ -10,6 +10,7 @@ Currently supported components are:
  * [Security: Trivy container scan](https://gitlab.com/hegerdes/gitlab-actions/-/tree/main/templates/trivy-container-scan.md)
  * [Container Build: Kaniko](https://gitlab.com/hegerdes/gitlab-actions/-/tree/main/templates/kaniko-build.md)
  * [Container Build: Buildah](https://gitlab.com/hegerdes/gitlab-actions/-/tree/main/templates/buildash-build.md)
+ * [Container Build: Merge-Manifests](https://gitlab.com/hegerdes/gitlab-actions/-/tree/main/templates/container-manifest-merge.md)
  * [Deployment: Helm install/upgrade](https://gitlab.com/hegerdes/gitlab-actions/-/tree/main/templates/helm-install.md)
 
 Currently supported snippets are:
