@@ -25,6 +25,9 @@ spec:
     dockerfile:
       type: string
       default: $CI_PROJECT_DIR/Dockerfile
+    add_image_arch_postfix:
+      type: boolean
+      default: false
     authors:
       type: string
       default: $CI_COMMIT_AUTHOR
@@ -99,6 +102,16 @@ $[[ inputs.as_job ]]:
 
       IFS=","
       for IMAGE_TAG in ${IMAGE_TAGS}; do
+        if [ "$[[ inputs.add_image_arch_postfix ]]" = "true" ]; then
+          if [ "$(uname -m)" = "x86_64" ]; then
+            ARCH=amd64
+          elif [ "$(uname -m)" = "aarch64" ]; then
+            ARCH=arm64
+          else
+            echo "Unknown system arch. Default to $(uname -m)"
+          fi
+          IMAGE_TAG="${IMAGE_TAG}-$ARCH"
+        fi
           # Ensure to strip any whitespace and send a curl request to each URL
           CONTAINER_BUILD_IAMGE_TAGS="${CONTAINER_BUILD_IAMGE_TAGS}-t $(echo $IMAGE_TAG | xargs) "
       done

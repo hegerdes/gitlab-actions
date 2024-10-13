@@ -2,6 +2,7 @@
 stages:
   - test
   - build
+  - package
   - scan
   - deploy
   - release
@@ -18,10 +19,16 @@ include:
     inputs:
       context: $CI_PROJECT_DIR/tests
       dockerfile: $CI_PROJECT_DIR/tests/Dockerfile
+      add_image_arch_postfix: true
   - component: $CI_SERVER_HOST/$CI_PROJECT_PATH/buildah-build@$CI_COMMIT_SHA
     inputs:
       context: $CI_PROJECT_DIR/tests
       dockerfile: $CI_PROJECT_DIR/tests/Dockerfile
+  - component: $CI_SERVER_HOST/$CI_PROJECT_PATH/container-manifest-merge@$CI_COMMIT_SHA
+    inputs:
+      stage: package
+      image_tags:
+        - $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG
   - component: $CI_SERVER_HOST/$CI_PROJECT_PATH/pre-commit@$CI_COMMIT_SHA
     inputs:
       autofix: true
@@ -34,9 +41,9 @@ include:
       release_name: nginx-ingress
       helm_extra_args: --atomic --wait --create-namespace --namespace test --dry-run --kube-apiserver https://kubernetes:6443 --kube-token $KUBE_TOKEN --kube-insecure-skip-tls-verify
       chart: tests/charts/demo
-      # Alternative:
-      # chart: ingress-nginx
-      # repo: https://kubernetes.github.io/ingress-nginx/
+  # Alternative:
+  # chart: ingress-nginx
+  # repo: https://kubernetes.github.io/ingress-nginx/
 
 # The above is all you need. But for testing the pipelines are run for amd64 and arm64.
 # So we override the jobs to use a matrix build. Again not needed by default.
@@ -117,6 +124,14 @@ KANIKO:build:
       - RUNNER: hegerdes-linux-arm64
 
 TRIVY:container-scan:
+  tags: [$RUNNER]
+  allow_failure: true
+  parallel:
+    matrix:
+      - RUNNER: saas-linux-small-amd64
+      - RUNNER: hegerdes-linux-arm64
+
+merge-image-manifests:
   tags: [$RUNNER]
   parallel:
     matrix:
