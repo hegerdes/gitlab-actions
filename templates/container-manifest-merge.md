@@ -21,7 +21,7 @@ You can customize the template settings.
 | Input                 | Default value                                   | Description                                                                                                                                                                                      |
 | --------------------- | ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `as_job`              | `merge-image-manifests`                         | The name of the job that gets imported. Use ".my_job" to include as template                                                                                                                     |
-| `stage`               | `release`                                       | The stage where you want the job to be added                                                                                                                                                     |
+| `stage`               | `package`                                       | The stage where you want the job to be added                                                                                                                                                     |
 | `image`               | `mplatform/manifest-tool:alpine`                | The Docker image of kaniko                                                                                                                                                                       |
 | `image_tags`          | [`$CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG`]      | Array of the image tags manifests to push.                                                                                                                                                       |
 | `image_platforms`     | `linux/amd64,linux/arm64`                       | It supports linux/amd64,linux/arm64,linux/arm/v5,linux/arm/v7,linux/s390x.                                                                                                                       |
@@ -30,8 +30,8 @@ You can customize the template settings.
 
 ### Variables
 
-| Variable                      | Description                                  |
-| ----------------------------- | -------------------------------------------- |
-| `GIT_STRATEGY`                | Default to `fetch`.                          |
-| `DOCKER_AUTH_CONFIG `         | GitLab variable containing registry secrets. |
-| `CONTAINER_BUILD_EXTRA_ARGS ` | Extra args for the build engine.             |
+| Variable              | Description                                                        |
+| --------------------- | ------------------------------------------------------------------ |
+| `IMAGE_TOOL_USERNAME` | The container registry username. Default is `CI_REGISTRY_USER`     |
+| `IMAGE_TOOL_PASSWORD` | The container registry username. Default is `CI_REGISTRY_PASSWORD` |
+| `DOCKER_AUTH_CONFIG`  | Docker Auth Config. Tool wil try to extract token from there.      |

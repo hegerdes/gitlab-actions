@@ -5,7 +5,7 @@ spec:
       default: merge-image-manifests
     stage:
       type: string
-      default: release
+      default: package
     image:
       type: string
       default: mplatform/manifest-tool:alpine
@@ -38,6 +38,7 @@ $[[ inputs.as_job ]]:
     entrypoint: [""]
   script:
     - |
+      # Merging images...
       export IMAGE_TAGS="$[[ inputs.image_tags ]]"
       IMAGE_TAGS="${IMAGE_TAGS#[}"
       IMAGE_TAGS="${IMAGE_TAGS%]}"
