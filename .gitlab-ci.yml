@@ -14,7 +14,10 @@ default:
 include:
   - local: .gitlab/ci/snippets.yml
   - local: .gitlab/ci/rules.yml
-  - component: $CI_SERVER_HOST/$CI_PROJECT_PATH/trivy-container-scan@$CI_COMMIT_SHA
+  - component: $CI_SERVER_HOST/$CI_PROJECT_PATH/pre-commit@$CI_COMMIT_SHA
+    inputs:
+      autofix: true
+      access_token: $PRE_COMMIT_ACCESS_TOKEN
   - component: $CI_SERVER_HOST/$CI_PROJECT_PATH/kaniko-build@$CI_COMMIT_SHA
     inputs:
       context: $CI_PROJECT_DIR/tests
@@ -25,25 +28,19 @@ include:
       context: $CI_PROJECT_DIR/tests
       dockerfile: $CI_PROJECT_DIR/tests/Dockerfile
   - component: $CI_SERVER_HOST/$CI_PROJECT_PATH/container-manifest-merge@$CI_COMMIT_SHA
-    inputs:
-      stage: package
-      image_tags:
-        - $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG
-  - component: $CI_SERVER_HOST/$CI_PROJECT_PATH/pre-commit@$CI_COMMIT_SHA
-    inputs:
-      autofix: true
-      access_token: $PRE_COMMIT_ACCESS_TOKEN
+  - component: $CI_SERVER_HOST/$CI_PROJECT_PATH/trivy-container-scan@$CI_COMMIT_SHA
+  - component: $CI_SERVER_HOST/$CI_PROJECT_PATH/cosign-container@$CI_COMMIT_SHA
   - component: $CI_SERVER_HOST/$CI_PROJECT_PATH/helm-package@$CI_COMMIT_SHA
     inputs:
       chart: tests/charts/demo
   - component: $CI_SERVER_HOST/$CI_PROJECT_PATH/helm-install@$CI_COMMIT_SHA
     inputs:
       release_name: nginx-ingress
-      helm_extra_args: --atomic --wait --create-namespace --namespace test --dry-run --kube-apiserver https://kubernetes:6443 --kube-token $KUBE_TOKEN --kube-insecure-skip-tls-verify
+      helm_extra_args: --create-namespace --namespace ci-test --kube-apiserver https://kubernetes:6443 --kube-token $KUBE_TOKEN --kube-insecure-skip-tls-verify
       chart: tests/charts/demo
-  # Alternative:
-  # chart: ingress-nginx
-  # repo: https://kubernetes.github.io/ingress-nginx/
+      # # Alternative:
+      # chart: ingress-nginx
+      # repo: https://kubernetes.github.io/ingress-nginx/
 
 # The above is all you need. But for testing the pipelines are run for amd64 and arm64.
 # So we override the jobs to use a matrix build. Again not needed by default.
@@ -52,6 +49,13 @@ include:
 variables:
   GL_K8S_CONTEXT: gitlab-ci
   GL_K8S_AGENT_ID: 1103496
+
+pre-commit:
+  tags: [$RUNNER]
+  parallel:
+    matrix:
+      - RUNNER: saas-linux-small-amd64
+      - RUNNER: hegerdes-linux-arm64
 
 snippets:
   image: $IMAGE
@@ -94,13 +98,6 @@ snippets:
     - !reference [.rules, default-branch-only-rules]
     - !reference [.rules, default-merge-rules]
 
-pre-commit:
-  tags: [$RUNNER]
-  parallel:
-    matrix:
-      - RUNNER: saas-linux-small-amd64
-      - RUNNER: hegerdes-linux-arm64
-
 BUILDAH:build:
   tags: [$RUNNER]
   # Multiple pushes may cause race condition. Retry twice
@@ -126,6 +123,13 @@ KANIKO:build:
 TRIVY:container-scan:
   tags: [$RUNNER]
   allow_failure: true
+  parallel:
+    matrix:
+      - RUNNER: saas-linux-small-amd64
+      - RUNNER: hegerdes-linux-arm64
+
+COSIGN:container-sign:
+  tags: [$RUNNER]
   parallel:
     matrix:
       - RUNNER: saas-linux-small-amd64

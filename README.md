@@ -7,10 +7,11 @@ This repo contains a collection of different [GitLab CI/CD Components](https://a
 Currently supported components are:
  * [Code Quality: pre-commit](https://gitlab.com/hegerdes/gitlab-actions/-/tree/main/templates/pre-commit.md)
  * [Build: Helm package](https://gitlab.com/hegerdes/gitlab-actions/-/tree/main/templates/helm-package.md)
- * [Security: Trivy container scan](https://gitlab.com/hegerdes/gitlab-actions/-/tree/main/templates/trivy-container-scan.md)
  * [Container Build: Kaniko](https://gitlab.com/hegerdes/gitlab-actions/-/tree/main/templates/kaniko-build.md)
  * [Container Build: Buildah](https://gitlab.com/hegerdes/gitlab-actions/-/tree/main/templates/buildash-build.md)
  * [Container Build: Merge-Manifests](https://gitlab.com/hegerdes/gitlab-actions/-/tree/main/templates/container-manifest-merge.md)
+ * [Security: Trivy container scan](https://gitlab.com/hegerdes/gitlab-actions/-/tree/main/templates/trivy-container-scan.md)
+ * [Security: Cosign container sign](https://gitlab.com/hegerdes/gitlab-actions/-/tree/main/templates/cosign-container.md)
  * [Deployment: Helm install/upgrade](https://gitlab.com/hegerdes/gitlab-actions/-/tree/main/templates/helm-install.md)
 
 Currently supported snippets are:

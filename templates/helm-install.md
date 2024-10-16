@@ -1,5 +1,4 @@
-
-## Deployment: Helm install
+# Deployment: Helm install
 
 ### Usage
 

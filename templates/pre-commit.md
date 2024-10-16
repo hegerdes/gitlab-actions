@@ -1,4 +1,4 @@
-## Code Quality: pre-commit
+# Code Quality: pre-commit
 
 ### Usage
 

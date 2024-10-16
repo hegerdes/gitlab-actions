@@ -1,4 +1,4 @@
-# GitLab CI/CD Components: helm-deploy
+# Build: Helm package
 
 ## Usage
 
