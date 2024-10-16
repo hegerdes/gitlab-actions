@@ -15,7 +15,7 @@ spec:
         - "$CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG"
     extra_args:
       type: string
-      default: ""
+      default: "--recursive"
     rules:
       type: array
       default:
@@ -59,7 +59,7 @@ $[[ inputs.as_job ]]:
       for IMAGE_TAG in ${IMAGE_TAGS}; do
           # Ensure to strip any whitespace and send a curl request to each URL
           echo "Signing image ${IMAGE_TAG}"
-          cosign sign --recursive $COSIGN_EXTRA_ARGS \
+          cosign sign $COSIGN_EXTRA_ARGS \
             --registry-password=$COSIGN_REGISTRY_PASSWORD \
             --registry-username=$COSIGN_REGISTRY_USERNAME \
             $IMAGE_TAG

@@ -2,7 +2,7 @@
 
 ### Usage
 
-Use this component to sign container images with [cosign](https://www.sigstore.dev/) project to allow safe image operations. It uses the sigstore project and by default uses keyless-signing using the identity if the gitlab CI job. In the future you may also pass keys to the component to sign with traditional public/private keys.
+Use this component to sign container images with [cosign](https://www.sigstore.dev/) project to allow safe image operations. It uses the sigstore project and by default uses keyless-signing using the identity if the gitlab CI job. You can also pass keys to the component to sign with traditional public/private keys via the `extra_args` input.
 You should add this component to an existing `.gitlab-ci.yml` file by using the `include:`
 keyword.
 
@@ -23,7 +23,7 @@ You can customize the template settings.
 | `stage`      | `package`                                  | The stage where you want the job to be added                                 |
 | `image`      | `chainguard/cosign:latest`                 | The Docker image of kaniko                                                   |
 | `image_tags` | [`$CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG`] | Array of the image tags manifests to push.                                   |
-| `extra_args` | ``                                         | Extra args passed to cosign.                                                 |
+| `extra_args` | `--recursive`                              | Extra args passed to cosign.                                                 |
 | `rules`      | *Default MR rules + Tags*                  | The rules when the job runs                                                  |
 
 ### Variables
