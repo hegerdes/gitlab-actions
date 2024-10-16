@@ -1,4 +1,4 @@
-# GitLab CI/CD Components: trivy-scan
+# Security: Trivy container scan
 
 ## Usage
 
