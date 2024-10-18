@@ -2,12 +2,18 @@
 
 spec:
   inputs:
+    job_name_prefix:
+      type: string
+      default: HELM
+      description: The name of the job that will be included with this component.
     stage:
       type: string
       default: build
+      description: The stage in which the job should run.
     image:
       default: alpine/helm:latest
       type: string
+      description: The container image to use for the job.
     chart:
       type: string
     chart_version:
@@ -34,9 +40,6 @@ spec:
     chart_repo_password:
       type: string
       default: ""
-    job_name_prefix:
-      type: string
-      default: HELM
     rules:
       type: array
       default:

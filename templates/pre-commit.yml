@@ -3,13 +3,19 @@ spec:
     as_job:
       type: string
       default: pre-commit
+      description: The name of the job that will be included with this component.
     stage:
       default: .pre
+      type: string
+      description: The stage in which the job should run.
     image:
+      type: string
       default: python:3.12-slim
+      description: The container image to use for the job.
     autofix:
       type: boolean
       default: false
+      description: If pre-commit should fix and push the changed. Requires token.
     access_token:
       type: string
       default: $CI_JOB_TOKEN

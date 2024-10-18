@@ -1,26 +1,35 @@
 spec:
   inputs:
-    stage:
-      default: deploy
-    image:
-      default: debian:bookworm-slim
-      type: string
-    release_name:
-      type: string
-    chart:
-      type: string
-    repo:
-      type: string
-      default: none
-    helm_extra_args:
-      type: string
-      default: --atomic --wait
-    values_file:
-      type: string
-      default: none
     job_name_prefix:
       type: string
       default: HELM
+      description: The name of the job that will be included with this component.
+    image:
+      default: debian:bookworm-slim
+      description: The container image to use for the job.
+      type: string
+    stage:
+      type: string
+      default: deploy
+      description: The stage in which the job should run.
+    release_name:
+      type: string
+      description: Helm release name.
+    chart:
+      type: string
+      description: Path or OCI URI to the helm chart package.
+    repo:
+      type: string
+      default: none
+      description: URI to the helm chart repo.
+    helm_extra_args:
+      type: string
+      default: --atomic --wait
+      description: Helm extra args.
+    values_file:
+      type: string
+      default: none
+      description: Pathe to a values file.
     rules:
       type: array
       default:

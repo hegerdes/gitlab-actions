@@ -3,31 +3,40 @@ spec:
     as_job:
       type: string
       default: KANIKO:build
+      description: The name of the job that will be included with this component.
     stage:
       type: string
       default: build
+      description: The stage in which the job should run.
     build_image:
       type: string
       default: gcr.io/kaniko-project/executor:debug
+      description: The container image to use for the job.
     push:
       type: boolean
       default: true
+      description: If the build image should be pushed.
     cache:
       type: boolean
       default: false
+      description: If caching should be enabled.
     image_tags:
       type: array
       default:
         - "$CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG"
+      description: List of image tags for the given build.
     context:
       type: string
       default: $CI_PROJECT_DIR
+      description: Path to the build context.
     dockerfile:
       type: string
       default: $CI_PROJECT_DIR/Dockerfile
+      description: Path to the Dockerfile.
     add_image_arch_postfix:
       type: boolean
       default: false
+      description: If the architecture shod be added to the image tag.
     authors:
       type: string
       default: $CI_COMMIT_AUTHOR

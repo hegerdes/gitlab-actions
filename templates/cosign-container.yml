@@ -3,19 +3,24 @@ spec:
     as_job:
       type: string
       default: COSIGN:container-sign
+      description: The name of the job that will be included with this component.
     stage:
       type: string
       default: package
+      description: The stage in which the job should run.
     image:
       type: string
       default: chainguard/cosign:latest
+      description: The container image to use for the job.
     image_tags:
       type: array
       default:
         - "$CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG"
+      description: List of image tags to be signed.
     extra_args:
       type: string
       default: "--recursive"
+      description: Extra args for cosign.
     rules:
       type: array
       default:

@@ -3,23 +3,31 @@ spec:
     as_job:
       type: string
       default: TRIVY:container-scan
+      description: The name of the job that will be included with this component.
     stage:
       default: scan
+      type: string
+      description: The stage in which the job should run.
     image:
       default: aquasec/trivy:latest
       type: string
+      description: The container image to use for the job.
     severity:
       default: HIGH,CRITICAL
       type: string
+      description: The severity scan level.
     extra-args:
       default: --ignore-unfixed --exit-code 0
       type: string
+      description: Extra args passed to trivy.
     scan_target:
       default: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG
       type: string
+      description: The image target to scan.
     allow_fail:
       type: boolean
       default: false
+      description: Allow job to fail.
     rules:
       type: array
       default:

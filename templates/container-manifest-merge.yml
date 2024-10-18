@@ -3,22 +3,28 @@ spec:
     as_job:
       type: string
       default: merge-image-manifests
+      description: The name of the job that will be included with this component.
     stage:
       type: string
       default: package
+      description: The stage in which the job should run.
     image:
       type: string
       default: mplatform/manifest-tool:alpine
+      description: The container image to use for the job.
     image_name_template:
       type: string
       default: "$CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG-ARCH"
+      description: The existing image tag name template which should be merged to one image manifest.
     image_tags:
       type: array
       default:
         - "$CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG"
+      description: List of image tags for the resulting merged manifest.
     image_platforms:
       type: string
       default: "linux/amd64,linux/arm64"
+      description: Image platforms to merge
     rules:
       type: array
       default:
