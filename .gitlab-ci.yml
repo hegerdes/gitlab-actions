@@ -85,6 +85,7 @@ snippets:
     - !reference [.snippets, cosign-install]
     - !reference [.snippets, talosctl-install]
     - !reference [.snippets, helm-install]
+    - !reference [.snippets, packer-install]
     - !reference [.snippets, kind-install]
     - !reference [.snippets, minikube-install]
     - !reference [.snippets, argocd-cli-install]

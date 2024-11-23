@@ -29,6 +29,7 @@ Currently supported snippets are:
  * skopeo-install
  * az-copy-install
  * minikube-install
+ * packer-install
  * argocd-cli-install
  * helm-install
  * kubeseal-install
