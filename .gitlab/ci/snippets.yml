@@ -44,7 +44,7 @@
   openssl-install:
     - |
       # Check if openssl is installed
-      if ! command -v kubectl > /dev/null; then
+      if ! command -v openssl > /dev/null; then
         echo "Installing openssl"
         if command -v apt-get > /dev/null; then
           apt-get update -qq > /dev/null
