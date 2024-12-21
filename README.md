@@ -44,7 +44,7 @@ Currently supported snippets are:
 **NOTE:** All components and snippets are `arm64` ready. Gitlab now offers hosted ARM runners. You can use these when setting:
 ```yaml
 default:
-  tags: [saas-linux-medium-arm64]
+  tags: [saas-linux-small-arm64]
 
 # or by including as a template and setting it by extending the job
 include:
@@ -53,7 +53,7 @@ include:
       as_job: .my-kaniko-build
 
 my-kaniko-build:
-  tags: [saas-linux-medium-arm64]
+  tags: [saas-linux-small-arm64]
   extends: .my-kaniko-build
 ```
 
