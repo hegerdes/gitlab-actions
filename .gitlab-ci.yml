@@ -84,6 +84,7 @@ snippets:
     - !reference [.snippets, skopeo-install]
     - !reference [.snippets, cosign-install]
     - !reference [.snippets, talosctl-install]
+    - !reference [.snippets, vault-install]
     - !reference [.snippets, helm-install]
     - !reference [.snippets, packer-install]
     - !reference [.snippets, kind-install]

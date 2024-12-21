@@ -30,6 +30,7 @@ Currently supported snippets are:
  * az-copy-install
  * minikube-install
  * packer-install
+ * vault-install
  * argocd-cli-install
  * helm-install
  * kubeseal-install
