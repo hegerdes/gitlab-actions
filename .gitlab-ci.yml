@@ -57,7 +57,7 @@ pre-commit:
   parallel:
     matrix:
       - RUNNER: saas-linux-small-amd64
-      - RUNNER: hegerdes-linux-arm64
+      - RUNNER: saas-linux-small-arm64
 
 snippets:
   image: $IMAGE
@@ -70,7 +70,7 @@ snippets:
     matrix:
       - RUNNER: saas-linux-small-amd64
         IMAGE: ["debian:bookworm-slim", "alpine"]
-      - RUNNER: hegerdes-linux-arm64
+      - RUNNER: saas-linux-small-arm64
         IMAGE: ["debian:bookworm-slim", "alpine"]
   script:
     - !reference [.snippets, debian-core-tools]
@@ -112,7 +112,7 @@ BUILDAH:build:
   parallel:
     matrix:
       - RUNNER: saas-linux-small-amd64
-      - RUNNER: hegerdes-linux-arm64
+      - RUNNER: saas-linux-small-arm64
 
 KANIKO:build:
   tags: [$RUNNER]
@@ -121,7 +121,7 @@ KANIKO:build:
   parallel:
     matrix:
       - RUNNER: saas-linux-small-amd64
-      - RUNNER: hegerdes-linux-arm64
+      - RUNNER: saas-linux-small-arm64
 
 TRIVY:container-scan:
   tags: [$RUNNER]
@@ -129,28 +129,28 @@ TRIVY:container-scan:
   parallel:
     matrix:
       - RUNNER: saas-linux-small-amd64
-      - RUNNER: hegerdes-linux-arm64
+      - RUNNER: saas-linux-small-arm64
 
 COSIGN:container-sign:
   tags: [$RUNNER]
   parallel:
     matrix:
       - RUNNER: saas-linux-small-amd64
-      - RUNNER: hegerdes-linux-arm64
+      - RUNNER: saas-linux-small-arm64
 
 merge-image-manifests:
   tags: [$RUNNER]
   parallel:
     matrix:
       - RUNNER: saas-linux-small-amd64
-      - RUNNER: hegerdes-linux-arm64
+      - RUNNER: saas-linux-small-arm64
 
 HELM:package:
   tags: [$RUNNER]
   parallel:
     matrix:
       - RUNNER: saas-linux-small-amd64
-      - RUNNER: hegerdes-linux-arm64
+      - RUNNER: saas-linux-small-arm64
 
 HELM:install:
   tags: [$RUNNER]
@@ -160,7 +160,7 @@ HELM:install:
   parallel:
     matrix:
       - RUNNER: saas-linux-small-amd64
-      - RUNNER: hegerdes-linux-arm64
+      - RUNNER: saas-linux-small-arm64
   # before_script:
   #   - !reference [.snippets, debian-core-tools]
   #   - !reference [.snippets, kubectl-install]
