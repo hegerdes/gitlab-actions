@@ -1,4 +1,5 @@
 #!/bin/bash
+
 # Check if argo-cli is installed
 if ! command -v argo > /dev/null; then
   echo "Installing argo-cli"

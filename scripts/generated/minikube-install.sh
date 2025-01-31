@@ -1,4 +1,5 @@
 #!/bin/bash
+
 # Check if minikube is installed
 if ! command -v minikube > /dev/null; then
   echo "Installing minikube"

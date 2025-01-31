@@ -1,4 +1,5 @@
 #!/bin/bash
+
 # Check if helm is installed
 if ! command -v helm > /dev/null; then
   echo "Installing helm"

@@ -1,4 +1,5 @@
 #!/bin/bash
+
 # Check if packer is installed
 if ! command -v packer > /dev/null; then
   echo "Installing packer"

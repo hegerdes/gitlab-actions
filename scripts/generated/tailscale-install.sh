@@ -1,4 +1,5 @@
 #!/bin/bash
+
 # Check if tailscale is installed
 if ! command -v tailscale > /dev/null; then
   echo "Installing tailscale"

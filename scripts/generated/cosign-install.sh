@@ -1,4 +1,5 @@
 #!/bin/bash
+
 # Check if cosign is installed
 if ! command -v cosign > /dev/null; then
   echo "Installing cosign!"

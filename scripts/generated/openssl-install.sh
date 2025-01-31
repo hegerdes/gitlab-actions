@@ -1,4 +1,5 @@
 #!/bin/bash
+
 # Check if openssl is installed
 if ! command -v openssl > /dev/null; then
   echo "Installing openssl"

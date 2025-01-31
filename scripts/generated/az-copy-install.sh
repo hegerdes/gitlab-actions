@@ -1,4 +1,5 @@
 #!/bin/bash
+
 # Check if azcopy is installed
 if ! command -v azcopy > /dev/null; then
   echo "Installing azcopy"

@@ -1,4 +1,5 @@
 #!/bin/bash
+
 # Check if terraform is installed
 if ! command -v terraform > /dev/null; then
   echo "Installing terraform!"

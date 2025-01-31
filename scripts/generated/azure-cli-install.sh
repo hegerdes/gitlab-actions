@@ -1,4 +1,5 @@
 #!/bin/bash
+
 # Check if az cli is installed
 if ! command -v az > /dev/null; then
   if command -v apt-get > /dev/null; then

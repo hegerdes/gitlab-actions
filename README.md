@@ -33,6 +33,7 @@ Currently supported snippets are:
  * vault-install
  * argocd-cli-install
  * helm-install
+ * helm-docs-install
  * kubeseal-install
  * kubeconform-install
  * kind-install

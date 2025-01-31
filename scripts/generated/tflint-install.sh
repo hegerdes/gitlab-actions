@@ -1,4 +1,5 @@
 #!/bin/bash
+
 # Check if tflint is installed
 if ! command -v tflint > /dev/null; then
   echo "Installing tflint"

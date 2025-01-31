@@ -1,4 +1,5 @@
 #!/bin/bash
+
 # Installing core tools
 if command -v apt-get > /dev/null; then
   if [ ! -z ${HTTP_PROXY+x} ]; then

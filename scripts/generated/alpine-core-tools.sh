@@ -1,4 +1,5 @@
 #!/bin/bash
+
 # Installing core tools
 if command -v apk > /dev/null; then
   apk add --no-cache curl jq unzip tar gzip gcompat > /dev/null

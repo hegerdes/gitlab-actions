@@ -1,4 +1,5 @@
 #!/bin/bash
+
 # Check if kubecontext should be configured
 if [ "$CI_KUBERNETES_ACTIVE" = "true" ] || [ ! -z ${GL_K8S_AGENT_ID+x} ] || [ ! -z ${GL_K8S_PROXY_URL+x} ] ; then
   if [ "$CI_SERVER_HOST" == "gitlab.com" ]; then

@@ -1,4 +1,5 @@
 #!/bin/bash
+
 # Check if vault is installed
 if ! command -v vault > /dev/null; then
   echo "Installing vault"

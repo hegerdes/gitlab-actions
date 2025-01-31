@@ -1,4 +1,5 @@
 #!/bin/bash
+
 # Check if kubeseal is installed
 if ! command -v kubeseal > /dev/null; then
   echo "Installing kubeseal"

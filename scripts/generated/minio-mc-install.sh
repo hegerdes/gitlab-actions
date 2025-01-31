@@ -1,4 +1,5 @@
 #!/bin/bash
+
 # Check if minio mc is installed
 if ! command -v mc > /dev/null; then
   echo "Installing minio mc"

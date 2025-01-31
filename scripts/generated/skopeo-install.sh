@@ -1,4 +1,5 @@
 #!/bin/bash
+
 # Check if skopeo is installed
 if ! command -v skopeo > /dev/null; then
   echo "Installing skopeo"

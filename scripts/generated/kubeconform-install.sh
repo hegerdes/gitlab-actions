@@ -1,4 +1,5 @@
 #!/bin/bash
+
 # Check if kubeconform is installed
 if ! command -v kubeconform > /dev/null; then
   echo "Installing kubeconform"

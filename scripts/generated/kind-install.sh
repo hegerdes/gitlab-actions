@@ -1,4 +1,5 @@
 #!/bin/bash
+
 # Check if kind is installed
 if ! command -v kind > /dev/null; then
   echo "Installing kind"

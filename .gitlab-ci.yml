@@ -86,6 +86,7 @@ snippets:
     - !reference [.snippets, talosctl-install]
     - !reference [.snippets, vault-install]
     - !reference [.snippets, helm-install]
+    - !reference [.snippets, helm-docs-install]
     - !reference [.snippets, packer-install]
     - !reference [.snippets, kind-install]
     - !reference [.snippets, minikube-install]

@@ -1,4 +1,5 @@
 #!/bin/bash
+
 # Check if yq is installed
 if ! command -v yq > /dev/null; then
   echo "Installing yq (by Mike Farah)"

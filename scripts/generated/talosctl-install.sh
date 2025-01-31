@@ -1,4 +1,5 @@
 #!/bin/bash
+
 # Check if talosctl is installed
 if ! command -v talosctl > /dev/null; then
   echo "Installing talosctl"

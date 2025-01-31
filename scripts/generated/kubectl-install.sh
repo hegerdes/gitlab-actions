@@ -1,4 +1,5 @@
 #!/bin/bash
+
 # Check if kubectl is installed
 if ! command -v kubectl > /dev/null; then
   echo "Installing kubectl"

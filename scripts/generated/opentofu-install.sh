@@ -1,4 +1,5 @@
 #!/bin/bash
+
 # Check if opentofu is installed
 if ! command -v tofu > /dev/null; then
   echo "Installing opentofu!"
