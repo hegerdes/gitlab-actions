@@ -25,6 +25,10 @@ include:
       context: $CI_PROJECT_DIR/tests
       dockerfile: $CI_PROJECT_DIR/tests/Dockerfile
       add_image_arch_postfix: true
+  - component: $CI_SERVER_HOST/$CI_PROJECT_PATH/buildkit-build@$CI_COMMIT_SHA
+    inputs:
+      context: $CI_PROJECT_DIR/tests
+      dockerfile: $CI_PROJECT_DIR/tests/Dockerfile
   - component: $CI_SERVER_HOST/$CI_PROJECT_PATH/buildah-build@$CI_COMMIT_SHA
     inputs:
       context: $CI_PROJECT_DIR/tests
@@ -46,12 +50,9 @@ include:
 
 # The above is all you need. But for testing the pipelines are run for amd64 and arm64.
 # So we override the jobs to use a matrix build. Again not needed by default.
-# Currently there is no small arm runner
-
 variables:
   GL_K8S_CONTEXT: gitlab-ci
   GL_K8S_AGENT_ID: 1103496
-
 pre-commit:
   tags: [$RUNNER]
   parallel:
@@ -69,10 +70,11 @@ snippets:
   parallel:
     matrix:
       - RUNNER: saas-linux-small-amd64
-        IMAGE: ["debian:bookworm-slim", "alpine"]
+        IMAGE: ["debian:trixie-slim", "alpine"]
       - RUNNER: saas-linux-small-arm64
-        IMAGE: ["debian:bookworm-slim", "alpine"]
+        IMAGE: ["debian:trixie-slim", "alpine"]
   script:
+    - echo "Running all snippets on ${CI_RUNNER_EXECUTABLE_ARCH}..."
     - !reference [.snippets, debian-core-tools]
     - !reference [.snippets, alpine-core-tools]
     - !reference [.snippets, openssl-install]
@@ -117,6 +119,15 @@ BUILDAH:build:
       - RUNNER: saas-linux-small-arm64
 
 KANIKO:build:
+  tags: [$RUNNER]
+  # Multiple pushes may cause race condition. Retry twice
+  retry: 2
+  parallel:
+    matrix:
+      - RUNNER: saas-linux-small-amd64
+      - RUNNER: saas-linux-small-arm64
+
+BUILDKIT:build:
   tags: [$RUNNER]
   # Multiple pushes may cause race condition. Retry twice
   retry: 2
