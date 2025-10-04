@@ -1,0 +1,184 @@
+spec:
+  inputs:
+    as_job:
+      type: string
+      default: "BUILDKIT:build"
+      description: The name of the job that will be included with this component.
+    stage:
+      type: string
+      default: "build"
+      description: The stage in which the job should run.
+    buildctl_image:
+      type: string
+      default: "moby/buildkit:latest"
+      description: The buildclt container image to use for the job.
+    build_platform:
+      type: string
+      default: "linux/amd64"
+      description: The target platform to build for. Format "linux/amd64,linux/arm64"
+    push:
+      type: boolean
+      default: true
+      description: If the build image should be pushed.
+    cache:
+      type: boolean
+      default: false
+      description: If caching should be enabled. Currently NOOP
+    image_tags:
+      type: array
+      default:
+        - "$CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG"
+      description: List of image tags for the given build.
+    context:
+      type: string
+      default: $CI_PROJECT_DIR
+      description: Path to the build context.
+    dockerfile:
+      type: string
+      default: $CI_PROJECT_DIR/Dockerfile
+      description: Path to the Dockerfile.
+    authors:
+      type: string
+      default: $CI_COMMIT_AUTHOR
+      description: Project Authors.
+    source_url:
+      type: string
+      default: $CI_PROJECT_URL
+      description: Project source code URL.
+    project_url:
+      type: string
+      default: $CI_PROJECT_URL
+      description: Project URL.
+    version:
+      type: string
+      default: $CI_COMMIT_REF_NAME
+      description: Application Version.
+    documentation_url:
+      type: string
+      default: $CI_PROJECT_URL
+      description: Project documentation URL.
+    description:
+      type: string
+      default: $CI_PROJECT_DESCRIPTION
+      description: Project description.
+    vendor:
+      type: string
+      default: UNKNOWN
+      description: Project vendor info.
+    license:
+      type: string
+      default: UNKNOWN
+      description: Project license info.
+    services:
+      type: array
+      default:
+        - name: moby/buildkit
+          entrypoint:
+            - sh
+            - -c
+            - echo "${BUILDKITD_CONF}" > /etc/buildkit/buildkitd.toml && buildkitd
+          alias: buildkitd
+          variables:
+            HEALTHCHECK_TCP_PORT: "1234"
+            BUILDKITD_CONF: |
+              # Buildkitd conf docs: https://github.com/moby/buildkit/blob/master/docs/buildkitd.toml.md
+              # Listen via tcp
+              [grpc]
+                address = [ "tcp://0.0.0.0:1234" ]
+              # Use the uni-assist nexus registry or google mirror
+              [registry."docker.io"]
+                mirrors = ["mirror.gcr.io"]
+    rules:
+      type: array
+      default:
+        # Add the job to merge request pipelines if there's an open merge request.
+        - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+        # Don't add it to a *branch* pipeline if it's already in a merge request pipeline.
+        - if: $CI_OPEN_MERGE_REQUESTS
+          when: never
+        # Add the job to main branch pipelines.
+        - if: $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH
+        - if: $CI_COMMIT_TAG
+---
+$[[ inputs.as_job ]]:
+  stage: $[[ inputs.stage ]]
+  image:
+    name: "$[[ inputs.buildctl_image ]]"
+    entrypoint: [""]
+  services: $[[ inputs.services ]]
+  variables:
+    CONTAINER_BUILD_PUSH: "$[[ inputs.push ]]"
+    CONTAINER_BUILD_USE_CACHE: "$[[ inputs.cache ]]"
+    CONTAINER_BUILD_PLATFORM: "$[[ inputs.build_platform ]]"
+    CONTEXT: "$[[ inputs.context | expand_vars ]]"
+    DOCKERFILE: "$[[ inputs.dockerfile | expand_vars ]]"
+    AUTHORS: "$[[ inputs.authors ]]"
+    SOURCE_URL: "$[[ inputs.source_url ]]"
+    PROJECT_URL: "$[[ inputs.project_url ]]"
+    VERSION: "$[[ inputs.version ]]"
+    DOCUMENTATION_URL: "$[[ inputs.documentation_url ]]"
+    DESCRIPTION: "$[[ inputs.description ]]"
+    VENDOR: "$[[ inputs.vendor ]]"
+    LICENSE: "$[[ inputs.license ]]"
+    BUILDKIT_HOST: tcp://buildkitd:1234
+  before_script:
+    - |
+      echo "Setting up job..." > /dev/null
+      mkdir -p ~/.docker
+    - |
+      echo "Creating login file..." > /dev/null
+      echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > ~/.docker/config.json
+  script:
+    - echo "Using version $(buildctl --version)"
+    - |
+      echo "Setting variables" > /dev/null
+      if [ "${CONTAINER_BUILD_USE_CACHE}" = "true" ]; then export CONTAINER_BUILD_EXTRA_ARGS=${CONTAINER_BUILD_DEFAULT_CACHE_ARGS} ${CONTAINER_BUILD_EXTRA_ARGS}; fi
+
+      # Remove [] from var
+      IMAGE_TAGS="$[[ inputs.image_tags ]]"
+      IMAGE_TAGS="${IMAGE_TAGS#[}"
+      IMAGE_TAGS="${IMAGE_TAGS%]}"
+
+      # Read the cleaned-up string into an array, splitting by commas
+      IFS=","
+      for IMAGE_TAG in ${IMAGE_TAGS}; do
+        # Ensure to strip any whitespace and send a curl request to each URL
+        CONTAINER_BUILD_IMAGE_TAGS="$CONTAINER_BUILD_IMAGE_TAGS --output type=image,name=$IMAGE_TAG,push=$CONTAINER_BUILD_PUSH"
+      done
+      unset IFS
+
+      # Extract the base image name from the Dockerfile
+      if [ -f "$DOCKERFILE" ]; then
+          BASE_IMG_NAME=$(grep "FROM" "$DOCKERFILE" | tail -n 1 | awk '{print $2}')
+          DOCKERFILE_PATH=$(dirname "$DOCKERFILE")
+          DOCKERFILE=$(basename "$DOCKERFILE")
+      else
+          echo "DOCKERFILE $DOCKERFILE does not exist."
+      fi
+
+      echo -e "Building:\n$(echo "$CONTAINER_BUILD_IMAGE_TAGS" | sed 's/image /image\n/g' | tr -d ' ')"
+      echo "Using context \"${CONTEXT}\" with dockerfile \"${DOCKERFILE}\""
+    - |
+      echo "Building image with buildkit..."
+      if [ ! -z ${CONTAINER_BUILD_EXTRA_ARGS+x} ]; then echo "Using extra args=${CONTAINER_BUILD_EXTRA_ARGS}"; fi
+      buildctl build \
+      --frontend dockerfile.v0 \
+      --opt platform="${CONTAINER_BUILD_PLATFORM}" \
+      --opt label:org.opencontainers.image.created="$(date -D FMT=minutes)" \
+      --opt label:org.opencontainers.image.authors="${AUTHORS}" \
+      --opt label:org.opencontainers.image.url="${PROJECT_URL}" \
+      --opt label:org.opencontainers.image.documentation="${DOCUMENTATION_URL}" \
+      --opt label:org.opencontainers.image.source="${SOURCE_URL}" \
+      --opt label:org.opencontainers.image.version="${VERSION}" \
+      --opt label:org.opencontainers.image.revision="${CI_COMMIT_SHORT_SHA}" \
+      --opt label:org.opencontainers.image.vendor="${VENDOR}" \
+      --opt label:org.opencontainers.image.licenses="${LICENSE}" \
+      --opt label:org.opencontainers.image.title="${CI_PROJECT_NAME}" \
+      --opt label:org.opencontainers.image.description="${DESCRIPTION}" \
+      --opt label:org.opencontainers.image.base.name="${BASE_IMG_NAME}" \
+      --opt filename="${DOCKERFILE}" \
+      --local context="${CONTEXT}" \
+      --local dockerfile="${DOCKERFILE_PATH}" \
+      $CONTAINER_BUILD_IMAGE_TAGS $CONTAINER_BUILD_EXTRA_ARGS
+      echo "Build done!"
+  rules: $[[ inputs.rules ]]
