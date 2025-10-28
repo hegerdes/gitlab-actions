@@ -10,7 +10,7 @@ if command -v apt-get > /dev/null; then
   fi
   apt-get update -qq > /dev/null
   apt-get install -y -qq --no-install-recommends \
-    curl jq unzip ca-certificates tar gzip > /dev/null
+    curl jq unzip ca-certificates tar gzip bash parallel > /dev/null
 else
   echo "The apt package manager does not exist. Skipping core tool install."
 fi

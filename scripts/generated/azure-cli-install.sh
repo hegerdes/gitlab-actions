@@ -13,9 +13,15 @@ if ! command -v az > /dev/null; then
       gpg --dearmor -o /etc/apt/keyrings/microsoft.gpg
     chmod go+r /etc/apt/keyrings/microsoft.gpg
 
+    # Compatibility layer till ms az repo has trixie
+    DEP_RELEASE_ALIAS=$(lsb_release -cs)
+    if [ "$DEP_RELEASE_ALIAS" = "trixie" ]; then
+      DEP_RELEASE_ALIAS="bookworm"
+    fi
+
     echo "Types: deb
     URIs: https://packages.microsoft.com/repos/azure-cli/
-    Suites: $(lsb_release -cs)
+    Suites: ${DEP_RELEASE_ALIAS}
     Components: main
     Architectures: $(dpkg --print-architecture)
     Signed-by: /etc/apt/keyrings/microsoft.gpg" > /etc/apt/sources.list.d/azure-cli.sources

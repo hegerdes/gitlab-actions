@@ -11,7 +11,7 @@
         fi
         apt-get update -qq > /dev/null
         apt-get install -y -qq --no-install-recommends \
-          curl jq unzip ca-certificates tar gzip > /dev/null
+          curl jq unzip ca-certificates tar gzip bash parallel > /dev/null
       else
         echo "The apt package manager does not exist. Skipping core tool install."
       fi
@@ -19,7 +19,7 @@
     - |
       # Installing core tools
       if command -v apk > /dev/null; then
-        apk add --no-cache curl jq unzip tar gzip gcompat > /dev/null
+        apk add --no-cache curl jq unzip tar gzip gcompat bash parallel > /dev/null
       else
         echo "The apk package manager does not exist. Skipping core tool install."
       fi
@@ -238,6 +238,7 @@
         HELM_DEFAULT_VERSION=$(curl -sL https://api.github.com/repos/helm/helm/releases/latest | jq -r .tag_name)
         curl -sL --fail --output /tmp/helm.tar.gz https://get.helm.sh/helm-${HELM_VERSION-$HELM_DEFAULT_VERSION}-linux-${ARCH-amd64}.tar.gz
         tar -xzf /tmp/helm.tar.gz -C /usr/local/bin/ --strip-components=1 --exclude={LICENSE,README.md}
+        rm /tmp/helm.tar.gz
       fi
       helm version
   helm-docs-install:
