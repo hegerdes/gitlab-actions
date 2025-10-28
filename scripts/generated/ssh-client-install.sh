@@ -1,0 +1,14 @@
+#!/bin/bash
+
+# Check if ssh is installed
+if ! command -v ssh > /dev/null; then
+  echo "Installing ssh-client"
+  if command -v apt-get > /dev/null; then
+    apt-get update -qq > /dev/null
+    apt-get install -y -qq --no-install-recommends openssh-client > /dev/null
+  fi
+  if command -v apk > /dev/null; then
+    apk add --no-cache openssh-client > /dev/null
+  fi
+fi
+openssl -V
