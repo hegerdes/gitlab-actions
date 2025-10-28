@@ -11,4 +11,4 @@ if ! command -v ssh > /dev/null; then
     apk add --no-cache openssh-client > /dev/null
   fi
 fi
-openssl -V
+ssh -V

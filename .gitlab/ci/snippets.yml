@@ -92,7 +92,7 @@
           apk add --no-cache openssh-client > /dev/null
         fi
       fi
-      openssl -V
+      ssh -V
   skopeo-install:
     - |
       # Check if skopeo is installed
