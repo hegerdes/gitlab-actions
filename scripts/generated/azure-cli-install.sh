@@ -6,7 +6,7 @@ if ! command -v az > /dev/null; then
     echo "Installing azure-cli"
     mkdir -p /etc/apt/keyrings
     apt-get update -qq > /dev/null
-    apt-get install -y -qq --no-install-recommends \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y -qq --no-install-recommends \
       apt-transport-https ca-certificates curl gnupg lsb-release > /dev/null
 
     curl -sLS https://packages.microsoft.com/keys/microsoft.asc |
@@ -28,7 +28,7 @@ if ! command -v az > /dev/null; then
     sed -i 's/^[ \t]*//' /etc/apt/sources.list.d/azure-cli.sources
 
     apt-get update -qq > /dev/null
-    apt-get install -y -qq azure-cli --no-install-recommends > /dev/null
+    DEBIAN_FRONTEND=noninteractive apt-get install -y -qq azure-cli --no-install-recommends > /dev/null
     az version
   else
     echo "Azure CLI install is currently only supported in debian based images. Skipping install!"

@@ -10,7 +10,7 @@ spec:
       description: The stage in which the job should run.
     image:
       type: string
-      default: python:3.12-slim
+      default: python:3.14-slim
       description: The container image to use for the job.
     autofix:
       type: boolean
