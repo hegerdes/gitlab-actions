@@ -21,3 +21,10 @@ if ! command -v docker-credential-ecr-login > /dev/null; then
   chmod +x /usr/local/bin/docker-credential-ecr-login
 fi
 docker-credential-ecr-login version
+if [ "${AWS_ECR_CREDENTIAL_HELPER_SKIP_DOCER_CONF:-false}" != "true" ]; then
+  echo "Creating dockers config.json with ecr credsStore"
+  mkdir -p ~/.docker
+  echo "{\"credsStore\":\"ecr-login\"}" > ~/.docker/config.json
+else
+  echo "Skipping creation of dockers config.json with ecr credsStore"
+fi

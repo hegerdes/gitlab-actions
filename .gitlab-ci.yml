@@ -56,7 +56,7 @@ variables:
   GL_K8S_CONTEXT: gitlab-ci
   GL_K8S_AGENT_ID: 1103496
 pre-commit:
-  tags: [ $RUNNER ]
+  tags: [$RUNNER]
   parallel:
     matrix:
       - RUNNER: saas-linux-small-amd64
@@ -64,7 +64,7 @@ pre-commit:
 
 snippets:
   image: $IMAGE
-  tags: [ $RUNNER ]
+  tags: [$RUNNER]
   timeout: 10m
   retry: 1
   variables:
@@ -72,45 +72,46 @@ snippets:
   parallel:
     matrix:
       - RUNNER: saas-linux-small-amd64
-        IMAGE: [ "debian:trixie-slim", "alpine" ]
+        IMAGE: ["debian:trixie-slim", "alpine"]
       - RUNNER: saas-linux-small-arm64
-        IMAGE: [ "debian:trixie-slim", "alpine" ]
+        IMAGE: ["debian:trixie-slim", "alpine"]
   script:
     - echo "Running all snippets on ${CI_RUNNER_EXECUTABLE_ARCH}..."
-    - !reference [ .snippets, debian-core-tools ]
-    - !reference [ .snippets, alpine-core-tools ]
-    - !reference [ .snippets, openssl-install ]
-    - !reference [ .snippets, ssh-client-install ]
-    - !reference [ .snippets, jq-install ]
-    - !reference [ .snippets, git-install ]
-    - !reference [ .snippets, kubectl-install ]
-    - !reference [ .snippets, kubeseal-install ]
-    - !reference [ .snippets, kubeconform-install ]
-    - !reference [ .snippets, skopeo-install ]
-    - !reference [ .snippets, cosign-install ]
-    - !reference [ .snippets, talosctl-install ]
-    - !reference [ .snippets, vault-install ]
-    - !reference [ .snippets, helm-install ]
-    - !reference [ .snippets, helm-docs-install ]
-    - !reference [ .snippets, packer-install ]
-    - !reference [ .snippets, kind-install ]
-    - !reference [ .snippets, minikube-install ]
-    - !reference [ .snippets, argocd-cli-install ]
-    - !reference [ .snippets, terraform-install ]
-    - !reference [ .snippets, opentofu-install ]
-    - !reference [ .snippets, tflint-install ]
-    - !reference [ .snippets, tailscale-install ]
-    - !reference [ .snippets, minio-mc-install ]
-    - !reference [ .snippets, yq-by-mike-farah-install ]
-    - !reference [ .snippets, azure-cli-install ]
-    - !reference [ .snippets, aws-cli-install ]
-    - !reference [ .snippets, aws-ecr-credential-helper-install ]
+    - !reference [.snippets, debian-core-tools]
+    - !reference [.snippets, alpine-core-tools]
+    - !reference [.snippets, openssl-install]
+    - !reference [.snippets, ssh-client-install]
+    - !reference [.snippets, jq-install]
+    - !reference [.snippets, git-install]
+    - !reference [.snippets, kubectl-install]
+    - !reference [.snippets, kubeseal-install]
+    - !reference [.snippets, kubeconform-install]
+    - !reference [.snippets, skopeo-install]
+    - !reference [.snippets, cosign-install]
+    - !reference [.snippets, talosctl-install]
+    - !reference [.snippets, vault-install]
+    - !reference [.snippets, helm-install]
+    - !reference [.snippets, helm-docs-install]
+    - !reference [.snippets, packer-install]
+    - !reference [.snippets, kind-install]
+    - !reference [.snippets, minikube-install]
+    - !reference [.snippets, argocd-cli-install]
+    - !reference [.snippets, terraform-install]
+    - !reference [.snippets, opentofu-install]
+    - !reference [.snippets, tflint-install]
+    - !reference [.snippets, tailscale-install]
+    - !reference [.snippets, minio-mc-install]
+    - !reference [.snippets, yq-by-mike-farah-install]
+    - !reference [.snippets, azure-cli-install]
+    - !reference [.snippets, aws-cli-install]
+    - !reference [.snippets, aws-ssm-install]
+    - !reference [.snippets, aws-ecr-credential-helper-install]
   rules:
-    - !reference [ .rules, default-branch-only-rules ]
-    - !reference [ .rules, default-merge-rules ]
+    - !reference [.rules, default-branch-only-rules]
+    - !reference [.rules, default-merge-rules]
 
 BUILDAH:build:
-  tags: [ $RUNNER ]
+  tags: [$RUNNER]
   # Multiple pushes may cause race condition. Retry twice
   retry: 2
   variables:
@@ -123,7 +124,7 @@ BUILDAH:build:
       - RUNNER: saas-linux-small-arm64
 
 KANIKO:build:
-  tags: [ $RUNNER ]
+  tags: [$RUNNER]
   # Multiple pushes may cause race condition. Retry twice
   retry: 2
   parallel:
@@ -132,7 +133,7 @@ KANIKO:build:
       - RUNNER: saas-linux-small-arm64
 
 BUILDKIT:build:
-  tags: [ $RUNNER ]
+  tags: [$RUNNER]
   # Multiple pushes may cause race condition. Retry twice
   retry: 2
   parallel:
@@ -141,7 +142,7 @@ BUILDKIT:build:
       - RUNNER: saas-linux-small-arm64
 
 TRIVY:container-scan:
-  tags: [ $RUNNER ]
+  tags: [$RUNNER]
   allow_failure: true
   parallel:
     matrix:
@@ -149,28 +150,28 @@ TRIVY:container-scan:
       - RUNNER: saas-linux-small-arm64
 
 COSIGN:container-sign:
-  tags: [ $RUNNER ]
+  tags: [$RUNNER]
   parallel:
     matrix:
       - RUNNER: saas-linux-small-amd64
       - RUNNER: saas-linux-small-arm64
 
 merge-image-manifests:
-  tags: [ $RUNNER ]
+  tags: [$RUNNER]
   parallel:
     matrix:
       - RUNNER: saas-linux-small-amd64
       - RUNNER: saas-linux-small-arm64
 
 HELM:package:
-  tags: [ $RUNNER ]
+  tags: [$RUNNER]
   parallel:
     matrix:
       - RUNNER: saas-linux-small-amd64
       - RUNNER: saas-linux-small-arm64
 
 HELM:install:
-  tags: [ $RUNNER ]
+  tags: [$RUNNER]
   services:
     - name: hegerdes/kubernetes-etcd
       alias: kubernetes
