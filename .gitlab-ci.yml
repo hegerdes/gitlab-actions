@@ -102,6 +102,7 @@ snippets:
     - !reference [.snippets, tailscale-install]
     - !reference [.snippets, minio-mc-install]
     - !reference [.snippets, yq-by-mike-farah-install]
+    - !reference [.snippets, github-cli-install]
     - !reference [.snippets, azure-cli-install]
     - !reference [.snippets, aws-cli-install]
     - !reference [.snippets, aws-ssm-install]

@@ -18,30 +18,33 @@ Currently supported snippets are:
  * debian-core-tools
  * alpine-core-tools
  * openssl-install
- * opentofu-install
+ * ssh-client-install
  * jq-install
- * terraform-install
  * git-install
- * tflint-install
  * kubectl-install
- * cosign-install
- * talosctl-install
- * skopeo-install
- * az-copy-install
- * minikube-install
- * packer-install
- * vault-install
- * argocd-cli-install
- * helm-install
- * helm-docs-install
  * kubeseal-install
  * kubeconform-install
+ * skopeo-install
+ * cosign-install
+ * talosctl-install
+ * vault-install
+ * helm-install
+ * helm-docs-install
+ * packer-install
  * kind-install
+ * minikube-install
+ * argocd-cli-install
+ * terraform-install
+ * opentofu-install
+ * tflint-install
  * tailscale-install
  * minio-mc-install
  * yq-by-mike-farah-install
+ * github-cli-install
  * azure-cli-install
  * aws-cli-install
+ * aws-ssm-install
+ * aws-ecr-credential-helper-install
 
 **NOTE:** All components and snippets are `arm64` ready. Gitlab now offers hosted ARM runners. You can use these when setting:
 ```yaml
