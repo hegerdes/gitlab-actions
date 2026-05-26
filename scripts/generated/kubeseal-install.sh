@@ -14,7 +14,7 @@ if ! command -v kubeseal > /dev/null; then
   KUBESEAL_DEFAULT_VERSION=$(curl -sL https://api.github.com/repos/bitnami-labs/sealed-secrets/releases/latest | jq -r .tag_name | cut -c 2-)
   curl -sL --fail --output kubeseal.tar.gz "https://github.com/bitnami-labs/sealed-secrets/releases/download/v${KUBESEAL_VERSION-$KUBESEAL_DEFAULT_VERSION}/kubeseal-${KUBESEAL_VERSION-$KUBESEAL_DEFAULT_VERSION}-linux-${ARCH-amd64}.tar.gz"
   tar -xzf kubeseal.tar.gz -C /usr/bin kubeseal
-  rm kubeseal.tar.gz
+  rm kubeseal.tar.gz || true
   chmod +x /usr/bin/kubeseal
 fi
 kubeseal --version

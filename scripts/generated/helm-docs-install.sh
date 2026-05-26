@@ -19,6 +19,6 @@ if ! command -v helm-docs > /dev/null; then
   fi
   curl -sL --fail --output helm-docs.tar.gz https://github.com/norwoodj/helm-docs/releases/download/v${HELM_DOCS_VERSION}/helm-docs_${HELM_DOCS_VERSION}_Linux_${ARCH-amd64}.tar.gz
   tar -xzf helm-docs.tar.gz -C /usr/local/bin --exclude={LICENSE,README.md,CHANGELOG.md}
-  rm helm-docs.tar.gz
+  rm helm-docs.tar.gz || true
 fi
 helm-docs --version

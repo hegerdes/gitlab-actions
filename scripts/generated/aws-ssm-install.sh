@@ -15,7 +15,7 @@ if ! command -v session-manager-plugin > /dev/null; then
     fi
     curl -sL "https://s3.amazonaws.com/session-manager-downloads/plugin/latest/ubuntu_${ARCH-64bit}/session-manager-plugin.deb" -o /tmp/ssm-plugin.deb
     dpkg -i /tmp/ssm-plugin.deb
-    rm /tmp/ssm-plugin.deb
+    rm /tmp/ssm-plugin.deb || true
   else
     echo "ERROR: This platform is currently not supported"
   fi

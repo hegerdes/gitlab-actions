@@ -53,7 +53,7 @@
       # Check if jq is installed
       if ! command -v jq > /dev/null; then
         echo "Installing jq"
-        echo "You can set the desired version via JQ_VERSION_TAG. Default is latest"
+        echo "You can set the desired version via JQ_VERSION. Default is latest"
         if [ "$(uname -m)" = "x86_64" ]; then
           ARCH=amd64
         elif [ "$(uname -m)" = "aarch64" ]; then
@@ -61,8 +61,8 @@
         else
           echo "Unknown system arch. Default to amd64"
         fi
-        JQ_DEFAULT_VERSION_TAG=$(curl -sL https://api.github.com/repos/jqlang/jq/releases/latest | grep tag_name | cut -d : -f 2 | sed 's/^ *//; s/ *$//; s/"//g; s/,//g')
-        curl -sL --fail --output /usr/local/bin/jq https://github.com/jqlang/jq/releases/download/${JQ_VERSION_TAG-$JQ_DEFAULT_VERSION_TAG}/jq-linux-${ARCH-amd64}
+        JQ_DEFAULT_VERSION=$(curl -sL https://api.github.com/repos/jqlang/jq/releases/latest | grep tag_name | cut -d : -f 2 | sed 's/^ *//; s/ *$//; s/"//g; s/,//g')
+        curl -sL --fail --output /usr/local/bin/jq https://github.com/jqlang/jq/releases/download/${JQ_VERSION-$JQ_DEFAULT_VERSION}/jq-linux-${ARCH-amd64}
         chmod +x /usr/local/bin/jq
       fi
       jq --version
@@ -71,7 +71,7 @@
       # Check if vault is installed
       if ! command -v vault > /dev/null; then
         echo "Installing vault"
-        echo "You can set the desired version via VAULT_VERSION_TAG. Default is latest"
+        echo "You can set the desired version via VAULT_VERSION. Default is latest"
         if [ "$(uname -m)" = "x86_64" ]; then
           ARCH=amd64
         elif [ "$(uname -m)" = "aarch64" ]; then
@@ -79,15 +79,15 @@
         else
           echo "Unknown system arch. Default to amd64"
         fi
-        VAULT_DEFAULT_VERSION_TAG=$(curl -sL https://api.github.com/repos/hashicorp/vault/releases/latest | jq -r .name)
-        VAULT_VERSION=${VAULT_VERSION_TAG-$VAULT_DEFAULT_VERSION_TAG}
+        VAULT_DEFAULT_VERSION=$(curl -sL https://api.github.com/repos/hashicorp/vault/releases/latest | jq -r .name)
+        VAULT_VERSION=${VAULT_VERSION-$VAULT_DEFAULT_VERSION}
         # Fix version beginning with "v"
         if echo "${VAULT_VERSION}" | grep -q "v"; then
           VAULT_VERSION="${VAULT_VERSION:1}"
         fi
         curl -sL --fail --output /tmp/vault.zip https://releases.hashicorp.com/vault/${VAULT_VERSION}/vault_${VAULT_VERSION}_linux_${ARCH-amd64}.zip
         unzip -q /tmp/vault.zip -d /usr/local/bin -x "LICENSE.txt"
-        rm /tmp/vault.zip
+        rm /tmp/vault.zip || true
       fi
       vault --version
   openssl-install:
@@ -102,6 +102,9 @@
         if command -v apk > /dev/null; then
           apk add --no-cache openssl > /dev/null
         fi
+        if command -v dnf > /dev/null; then
+          dnf install -y openssl > /dev/null
+        fi
       fi
       openssl version
   ssh-client-install:
@@ -115,6 +118,9 @@
         fi
         if command -v apk > /dev/null; then
           apk add --no-cache openssh-client > /dev/null
+        fi
+        if command -v dnf > /dev/null; then
+          dnf install -y openssh-clients > /dev/null
         fi
       fi
       ssh -V
@@ -247,6 +253,7 @@
       # Check if tflint is installed
       if ! command -v tflint > /dev/null; then
         echo "Installing tflint"
+        echo "You can set the desired version via TFLINT_VERSION. Default is latest"
         if [ "$(uname -m)" = "x86_64" ]; then
           ARCH=amd64
         elif [ "$(uname -m)" = "aarch64" ]; then
@@ -254,11 +261,11 @@
         else
           echo "Unknown system arch. Default to amd64"
         fi
-        TFLINT_SYSTEM_TYPE="linux_${ARCH-amd64}.zip"
-        TFLINT_RELEASES="https://api.github.com/repos/terraform-linters/tflint/releases/latest"
-        TFLINT_URL=$(curl -sL $TFLINT_RELEASES | jq -r --arg term $TFLINT_SYSTEM_TYPE '.assets[] | select(.name | test($term)).browser_download_url')
-        curl -sL --fail --output /tmp/tflint.zip $TFLINT_URL
+        TFLINT_DEFAULT_VERSION=$(curl -sL https://api.github.com/repos/terraform-linters/tflint/releases/latest | jq -r .name)
+        TFLINT_VERSION="${TFLINT_VERSION-$TFLINT_DEFAULT_VERSION}"
+        curl -sL --fail --output /tmp/tflint.zip "https://github.com/terraform-linters/tflint/releases/download/${TFLINT_VERSION}/tflint_linux_${ARCH-amd64}.zip"
         unzip /tmp/tflint.zip -d /usr/bin/ > /dev/null
+        rm /tmp/tflint.zip || true
       fi
       tflint --version
   helm-install:
@@ -277,7 +284,7 @@
         HELM_DEFAULT_VERSION=$(curl -sL https://api.github.com/repos/helm/helm/releases/latest | jq -r .tag_name)
         curl -sL --fail --output /tmp/helm.tar.gz https://get.helm.sh/helm-${HELM_VERSION-$HELM_DEFAULT_VERSION}-linux-${ARCH-amd64}.tar.gz
         tar -xzf /tmp/helm.tar.gz -C /usr/local/bin/ --strip-components=1 --exclude={LICENSE,README.md}
-        rm /tmp/helm.tar.gz
+        rm /tmp/helm.tar.gz || true
       fi
       helm version
   helm-docs-install:
@@ -301,7 +308,7 @@
         fi
         curl -sL --fail --output helm-docs.tar.gz https://github.com/norwoodj/helm-docs/releases/download/v${HELM_DOCS_VERSION}/helm-docs_${HELM_DOCS_VERSION}_Linux_${ARCH-amd64}.tar.gz
         tar -xzf helm-docs.tar.gz -C /usr/local/bin --exclude={LICENSE,README.md,CHANGELOG.md}
-        rm helm-docs.tar.gz
+        rm helm-docs.tar.gz || true
       fi
       helm-docs --version
   kind-install:
@@ -366,10 +373,12 @@
         if command -v apt-get > /dev/null; then
           apt-get update -qq > /dev/null
           DEBIAN_FRONTEND=noninteractive apt-get install -y -qq --no-install-recommends git > /dev/null
-        elif command -v apk > /dev/null; then
+        fi
+        if command -v apk > /dev/null; then
           apk add git > /dev/null
-        else
-          echo "Unsupported OS. Can not install git"
+        fi
+        if command -v dnf > /dev/null; then
+          dnf install -y git > /dev/null
         fi
       fi
       git version
@@ -389,7 +398,7 @@
         KUBESEAL_DEFAULT_VERSION=$(curl -sL https://api.github.com/repos/bitnami-labs/sealed-secrets/releases/latest | jq -r .tag_name | cut -c 2-)
         curl -sL --fail --output kubeseal.tar.gz "https://github.com/bitnami-labs/sealed-secrets/releases/download/v${KUBESEAL_VERSION-$KUBESEAL_DEFAULT_VERSION}/kubeseal-${KUBESEAL_VERSION-$KUBESEAL_DEFAULT_VERSION}-linux-${ARCH-amd64}.tar.gz"
         tar -xzf kubeseal.tar.gz -C /usr/bin kubeseal
-        rm kubeseal.tar.gz
+        rm kubeseal.tar.gz || true
         chmod +x /usr/bin/kubeseal
       fi
       kubeseal --version
@@ -410,7 +419,7 @@
         curl -sL --fail --output /tmp/kubeconform.tar.gz \
           https://github.com/yannh/kubeconform/releases/download/${KUBECONFORM_VERSION-$KUBECONFORM_DEFAULT_VERSION}/kubeconform-linux-${ARCH-amd64}.tar.gz
         tar -xzf /tmp/kubeconform.tar.gz -C /usr/local/bin/ --exclude={LICENSE,README.md}
-        rm /tmp/kubeconform.tar.gz
+        rm /tmp/kubeconform.tar.gz || true
         chmod +x /usr/local/bin/kubeconform
       fi
       kubeconform -v
@@ -527,7 +536,7 @@
         fi
         curl -sL https://github.com/cli/cli/releases/download/v${GH_VERSION}/gh_${GH_VERSION}_linux_${ARCH-amd64}.tar.gz -o /tmp/gh-cli.tar.gz
         tar -xzvf /tmp/gh-cli.tar.gz -C /usr/local/bin/ --strip-components=2 gh_${GH_VERSION}_linux_${ARCH-amd64}/bin/gh
-        rm /tmp/gh-cli.tar.gz
+        rm /tmp/gh-cli.tar.gz || true
       fi
       gh version
   tailscale-install:
@@ -552,7 +561,7 @@
         FILE_PREFIX="tailscale_${TAILSCALE_VERSION}_${ARCH-amd64}"
         curl -sL https://pkgs.tailscale.com/stable/${FILE_PREFIX}.tgz -o tailscale.tar.gz
         tar -xzf tailscale.tar.gz --strip-components=1 -C /usr/local/bin/ $FILE_PREFIX/tailscale $FILE_PREFIX/tailscaled
-        rm tailscale.tar.gz
+        rm tailscale.tar.gz || true
       fi
       mkdir -p /var/run/tailscale
       tailscale --version
@@ -623,7 +632,7 @@
           fi
           curl -sL "https://s3.amazonaws.com/session-manager-downloads/plugin/latest/ubuntu_${ARCH-64bit}/session-manager-plugin.deb" -o /tmp/ssm-plugin.deb
           dpkg -i /tmp/ssm-plugin.deb
-          rm /tmp/ssm-plugin.deb
+          rm /tmp/ssm-plugin.deb || true
         else
           echo "ERROR: This platform is currently not supported"
         fi

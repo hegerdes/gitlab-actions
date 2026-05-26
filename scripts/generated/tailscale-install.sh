@@ -20,7 +20,7 @@ if ! command -v tailscale > /dev/null; then
   FILE_PREFIX="tailscale_${TAILSCALE_VERSION}_${ARCH-amd64}"
   curl -sL https://pkgs.tailscale.com/stable/${FILE_PREFIX}.tgz -o tailscale.tar.gz
   tar -xzf tailscale.tar.gz --strip-components=1 -C /usr/local/bin/ $FILE_PREFIX/tailscale $FILE_PREFIX/tailscaled
-  rm tailscale.tar.gz
+  rm tailscale.tar.gz || true
 fi
 mkdir -p /var/run/tailscale
 tailscale --version

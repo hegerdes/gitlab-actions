@@ -14,6 +14,6 @@ if ! command -v helm > /dev/null; then
   HELM_DEFAULT_VERSION=$(curl -sL https://api.github.com/repos/helm/helm/releases/latest | jq -r .tag_name)
   curl -sL --fail --output /tmp/helm.tar.gz https://get.helm.sh/helm-${HELM_VERSION-$HELM_DEFAULT_VERSION}-linux-${ARCH-amd64}.tar.gz
   tar -xzf /tmp/helm.tar.gz -C /usr/local/bin/ --strip-components=1 --exclude={LICENSE,README.md}
-  rm /tmp/helm.tar.gz
+  rm /tmp/helm.tar.gz || true
 fi
 helm version

@@ -19,6 +19,6 @@ if ! command -v gh > /dev/null; then
   fi
   curl -sL https://github.com/cli/cli/releases/download/v${GH_VERSION}/gh_${GH_VERSION}_linux_${ARCH-amd64}.tar.gz -o /tmp/gh-cli.tar.gz
   tar -xzvf /tmp/gh-cli.tar.gz -C /usr/local/bin/ --strip-components=2 gh_${GH_VERSION}_linux_${ARCH-amd64}/bin/gh
-  rm /tmp/gh-cli.tar.gz
+  rm /tmp/gh-cli.tar.gz || true
 fi
 gh version
