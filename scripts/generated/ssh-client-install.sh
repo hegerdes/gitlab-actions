@@ -10,5 +10,8 @@ if ! command -v ssh > /dev/null; then
   if command -v apk > /dev/null; then
     apk add --no-cache openssh-client > /dev/null
   fi
+  if command -v dnf > /dev/null; then
+    dnf install -y openssh-clients > /dev/null
+  fi
 fi
 ssh -V

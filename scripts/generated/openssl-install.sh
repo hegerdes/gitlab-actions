@@ -10,5 +10,8 @@ if ! command -v openssl > /dev/null; then
   if command -v apk > /dev/null; then
     apk add --no-cache openssl > /dev/null
   fi
+  if command -v dnf > /dev/null; then
+    dnf install -y openssl > /dev/null
+  fi
 fi
 openssl version
