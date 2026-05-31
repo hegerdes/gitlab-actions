@@ -25,10 +25,12 @@ The template should work without modifications but you can customize the templat
 | `buildctl_image`    | `moby/buildkit:latest`            | The Docker image of kaniko                                                                                                   |
 | `build_platform`    | `linux/amd64`                     | The The target platform to build for.                                                                                        |
 | `push`              | `true`                            | When set to `true` the image will be pushed to the default registry. Set to `false` to only build without pushing the image. |
-| `cache`             | `false`                           | When set to `true` cache layers will be saved to disk. Currently NOOP.                                                       |
+| `sbom`              | `true`                            | if [SBOM](https://en.wikipedia.org/wiki/Software_supply_chain) should be generated.                                          |
+| `cache`             | `false`                           | When set to `true` cache layers will be saved to projects container registry. Override via `CONTAINER_BUILD_CACHE_ARGS`      |
 | `image_tags`        | ["$CI_COMMIT_REF_SLUG", "latest"] | Array of the image tags to build.                                                                                            |
 | `context`           | `$CI_PROJECT_DIR`                 | The build context.                                                                                                           |
 | `dockerfile`        | `$CI_PROJECT_DIR/Dockerfile`      | The path to the Dockerfile.                                                                                                  |
+| `compression`       | `zstd`                            | The compression to be used for the generated image. Options are `uncompressed,gzip,estargz,zstd`.                            |
 | `authors`           | `$CI_COMMIT_AUTHOR`               | For OCI image label: Name of the image author(s).                                                                            |
 | `source_url`        | `$CI_PROJECT_URL`                 | For OCI image label: Url of the source code.                                                                                 |
 | `project_url`       | `$CI_PROJECT_URL`                 | For OCI image label: Url of the project.                                                                                     |
@@ -42,8 +44,10 @@ The template should work without modifications but you can customize the templat
 
 ### Variables
 
-| Variable                     | Description                                 |
-| ---------------------------- | ------------------------------------------- |
-| `GIT_STRATEGY`               | Default to `fetch`.                         |
-| `DOCKER_CONFIG_JSON`         | The registry auth json in the docker format |
-| `CONTAINER_BUILD_EXTRA_ARGS` | Extra args for the build engine.            |
+| Variable                     | Description                                                                   |
+| ---------------------------- | ----------------------------------------------------------------------------- |
+| `GIT_STRATEGY`               | Default to `fetch`.                                                           |
+| `DOCKER_CONFIG_JSON`         | The registry auth json in the docker format                                   |
+| `CONTAINER_BUILD_EXTRA_ARGS` | Extra args for the build engine.                                              |
+| `CONTAINER_BUILD_CACHE_ARGS` | Buildkit's cache args [buildkit docs](https://github.com/moby/buildkit#cache) |
+| `IMAGE_TAGS`                 | Override the `image_tags` input                                               |
