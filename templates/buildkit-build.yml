@@ -141,7 +141,6 @@ $[[ inputs.as_job ]]:
     paths:
       - build-artifacts/**
     expire_in: 1 week
-    expose_as: build metadata
   before_script:
     - |
       echo "Setting up job..." > /dev/null
