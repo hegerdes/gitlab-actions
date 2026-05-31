@@ -153,11 +153,15 @@ $[[ inputs.as_job ]]:
     - |
       echo "Setting variables" > /dev/null
       mkdir -p build-artifacts
-      if [ "${CONTAINER_BUILD_USE_CACHE}" = "true" ]; then
-        export CONTAINER_BUILD_EXTRA_ARGS=${CONTAINER_BUILD_CACHE_ARGS} ${CONTAINER_BUILD_EXTRA_ARGS}
-      fi
+
+      # SBOM
       if [ "${CONTAINER_BUILD_SBOM}" = "true" ]; then
-        export CONTAINER_BUILD_EXTRA_ARGS=--opt attest:sbom= ${CONTAINER_BUILD_EXTRA_ARGS}
+        export CONTAINER_BUILD_EXTRA_ARGS="--opt attest:sbom= ${CONTAINER_BUILD_EXTRA_ARGS}"
+      fi
+
+      # Cache
+      if [ "${CONTAINER_BUILD_USE_CACHE}" = "true" ]; then
+        export CONTAINER_BUILD_EXTRA_ARGS="${CONTAINER_BUILD_CACHE_ARGS} ${CONTAINER_BUILD_EXTRA_ARGS}"
       fi
 
       # Allow var override for tags
