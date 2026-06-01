@@ -7,6 +7,7 @@ This repo contains a collection of different [GitLab CI/CD Components](https://a
 Currently supported components are:
  * [Code Quality: pre-commit](https://gitlab.com/hegerdes/gitlab-actions/-/tree/main/templates/pre-commit.md)
  * [Build: Helm package](https://gitlab.com/hegerdes/gitlab-actions/-/tree/main/templates/helm-package.md)
+ * [Container Build: Buildkit](https://gitlab.com/hegerdes/gitlab-actions/-/tree/main/templates/buildkit-build.md)
  * [Container Build: Kaniko](https://gitlab.com/hegerdes/gitlab-actions/-/tree/main/templates/kaniko-build.md)
  * [Container Build: Buildah](https://gitlab.com/hegerdes/gitlab-actions/-/tree/main/templates/buildash-build.md)
  * [Container Build: Merge-Manifests](https://gitlab.com/hegerdes/gitlab-actions/-/tree/main/templates/container-manifest-merge.md)
@@ -46,20 +47,42 @@ Currently supported snippets are:
  * aws-ssm-install
  * aws-ecr-credential-helper-install
 
-**NOTE:** All components and snippets are `arm64` ready. Gitlab now offers hosted ARM runners. You can use these when setting:
+## Examples
+**NOTE:** All components and snippets are `arm64` ready. Gitlab now offers hosted ARM runners.  
+For more see `.gitlab-ci.yml`
+
+### Components
 ```yaml
 default:
   tags: [saas-linux-small-arm64]
 
 # or by including as a template and setting it by extending the job
 include:
-  - component: gitlab.com/hegerdes/gitlab-actions/kaniko-build@<VERSION>
+  - component: gitlab.com/hegerdes/gitlab-actions/buildkit-build@<VERSION>
     inputs:
-      as_job: .my-kaniko-build
+      as_job: .my-buildkit-build
 
-my-kaniko-build:
+my-buildkit-build:
   tags: [saas-linux-small-arm64]
-  extends: .my-kaniko-build
+  extends: .my-buildkit-build
+```
+### Snippets
+```yaml
+  - project: hegerdes/gitlab-actions
+    file: .gitlab/ci/snippets.yml
+  # Or
+  - remote: https://gitlab.com/hegerdes/gitlab-actions/-/raw/main/.gitlab/ci/snippets.yml
+
+snippets:
+  image: alpine
+  script:
+    - echo "Running snippets on ${CI_RUNNER_EXECUTABLE_ARCH}..."
+    - !reference [.snippets, debian-core-tools]
+    - !reference [.snippets, alpine-core-tools]
+    - !reference [.snippets, openssl-install]
+    - !reference [.snippets, kubectl-install]
+    - !reference [.snippets, kubeseal-install]
+    - !reference [.snippets, kubeconform-install]
 ```
 
 ## Releases
