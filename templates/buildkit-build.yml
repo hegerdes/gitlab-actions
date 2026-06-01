@@ -178,7 +178,7 @@ $[[ inputs.as_job ]]:
       IFS=","
       for IMAGE_TAG in ${IMAGE_TAGS}; do
         # Build output args
-        CONTAINER_BUILD_IMAGE_TAGS="$CONTAINER_BUILD_IMAGE_TAGS --output type=image,name=$IMAGE_TAG,compression=$CONTAINER_BUILD_COMPRESSION,push=$CONTAINER_BUILD_PUSH"
+        CONTAINER_BUILD_IMAGE_TAGS="$CONTAINER_BUILD_IMAGE_TAGS --output type=image,name=$IMAGE_TAG,compression=$CONTAINER_BUILD_COMPRESSION,oci-artifact=true,push=$CONTAINER_BUILD_PUSH"
       done
       unset IFS
 
