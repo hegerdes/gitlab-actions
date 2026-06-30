@@ -1,0 +1,57 @@
+# Terraform/Module-Base
+
+spec:
+  inputs:
+    as_job:
+      type: string
+      default: TERRAFORM:publish
+      description: The name of the job that will be included with this component.
+    stage:
+      type: string
+      default: build
+      description: The stage in which the job should run.
+    image:
+      type: string
+      default: curlimages/curl:latest
+      description: The container image to use for the job.
+    module_dir:
+      type: string
+      default: ${CI_PROJECT_DIR}
+      description: The relative path to the root directory of the Terraform project.
+    module_name:
+      type: string
+      default: ${CI_PROJECT_NAME}
+      description: The name of your Terraform module, must not have any spaces or underscores (will be translated to hyphens).
+    module_system:
+      type: string
+      default: local
+      description: The system or provider your Terraform module targets (ex. local, aws, google).
+    module_version:
+      type: string
+      default: ${CI_COMMIT_TAG}
+      description: The version - it's recommended to follow SemVer for Terraform Module Versioning.
+    rules:
+      type: array
+      default:
+        # On Tags only
+        - if: $CI_COMMIT_TAG
+
+---
+$[[ inputs.as_job ]]:
+  stage: "$[[ inputs.stage ]]"
+  image: "$[[ inputs.image ]]"
+  variables:
+    TERRAFORM_MODULE_DIR: "$[[ inputs.module_dir | expand_vars ]]"
+    TERRAFORM_MODULE_NAME: "$[[ inputs.module_name | expand_vars ]]"
+    TERRAFORM_MODULE_SYSTEM: "$[[ inputs.module_system | expand_vars ]]"
+    TERRAFORM_MODULE_VERSION: "$[[ inputs.module_version | expand_vars ]]"
+  script:
+    - TERRAFORM_MODULE_NAME=$(echo "${TERRAFORM_MODULE_NAME}" | tr " _" -)  # module-name must not have spaces or underscores, so translate them to hyphens
+    - TAR_FILENAME="/tmp/${TERRAFORM_MODULE_NAME}-${TERRAFORM_MODULE_SYSTEM}-${TERRAFORM_MODULE_VERSION}.tgz"
+    - UPLOAD_URL="${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/terraform/modules/${TERRAFORM_MODULE_NAME}/${TERRAFORM_MODULE_SYSTEM}/${TERRAFORM_MODULE_VERSION}/file"
+    # Builds the Terraform module artifact: a gzipped tar archive with the contents from `$TERRAFORM_MODULE_DIR` without a `.git` directory.
+    - tar -vczf "${TAR_FILENAME}" -C "${TERRAFORM_MODULE_DIR}" --exclude=./.git .
+    # Uploads the Terraform module artifact to the GitLab Terraform Module Registry, see
+    # docs/user/packages/terraform_module_registry/index.html#publish-a-terraform-module
+    - 'curl --fail-with-body --location --header "JOB-TOKEN: ${CI_JOB_TOKEN}" --upload-file "${TAR_FILENAME}" "${UPLOAD_URL}"'
+  rules: $[[ inputs.rules ]]
