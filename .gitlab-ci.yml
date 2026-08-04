@@ -94,6 +94,7 @@ snippets:
     - !reference [.snippets, helm-docs-install]
     - !reference [.snippets, packer-install]
     - !reference [.snippets, kind-install]
+    - !reference [.snippets, step-cli-install]
     - !reference [.snippets, minikube-install]
     - !reference [.snippets, argocd-cli-install]
     - !reference [.snippets, terraform-install]

@@ -33,6 +33,7 @@ Currently supported snippets are:
  * helm-docs-install
  * packer-install
  * kind-install
+ * step-cli-install
  * minikube-install
  * argocd-cli-install
  * terraform-install

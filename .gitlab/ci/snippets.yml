@@ -539,6 +539,31 @@
         rm /tmp/gh-cli.tar.gz || true
       fi
       gh version
+  step-cli-install:
+    - |
+      # Check if step cli is installed
+      if ! command -v step > /dev/null; then
+        echo "Installing step cli"
+        echo "You can set the desired version via STEP_CLI_VERSION. Default is latest"
+        if [ "$(uname -m)" = "x86_64" ]; then
+          ARCH=amd64
+        elif [ "$(uname -m)" = "aarch64" ]; then
+          ARCH=arm64
+        else
+          echo "Unknown system arch. Default to amd64"
+        fi
+        STEP_CLI_DEFAULT_VERSION=$(curl -sL https://api.github.com/repos/smallstep/cli/releases/latest | jq -r .tag_name)
+        STEP_VERSION=${STEP_CLI_VERSION-$STEP_CLI_DEFAULT_VERSION}
+        # Fix version beginning with "v"
+        if echo "${STEP_VERSION}" | grep -q "v"; then
+          STEP_VERSION="${STEP_VERSION:1}"
+        fi
+        curl -sL https://dl.smallstep.com/gh-release/cli/gh-release-header/v${STEP_VERSION}/step_linux_${STEP_VERSION}_${ARCH-amd64}.tar.gz -o /tmp/step-cli.tar.gz
+
+        tar -xzvf /tmp/step-cli.tar.gz -C /usr/local/bin/ --strip-components=2 step_${STEP_VERSION}/bin/step
+        rm /tmp/step-cli.tar.gz || true
+      fi
+      step version
   tailscale-install:
     - |
       # Check if tailscale is installed
