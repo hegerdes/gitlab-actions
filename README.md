@@ -7,6 +7,7 @@ This repo contains a collection of different [GitLab CI/CD Components](https://a
 Currently supported components are:
  * [Code Quality: pre-commit](https://gitlab.com/hegerdes/gitlab-actions/-/tree/main/templates/pre-commit.md)
  * [Build: Helm package](https://gitlab.com/hegerdes/gitlab-actions/-/tree/main/templates/helm-package.md)
+ * [Build: Terraform/ToFu Module](https://gitlab.com/hegerdes/gitlab-actions/-/tree/main/templates/terraform-module.md)
  * [Container Build: Buildkit](https://gitlab.com/hegerdes/gitlab-actions/-/tree/main/templates/buildkit-build.md)
  * [Container Build: Kaniko](https://gitlab.com/hegerdes/gitlab-actions/-/tree/main/templates/kaniko-build.md)
  * [Container Build: Buildah](https://gitlab.com/hegerdes/gitlab-actions/-/tree/main/templates/buildash-build.md)
@@ -14,6 +15,7 @@ Currently supported components are:
  * [Security: Trivy container scan](https://gitlab.com/hegerdes/gitlab-actions/-/tree/main/templates/trivy-container-scan.md)
  * [Security: Cosign container sign](https://gitlab.com/hegerdes/gitlab-actions/-/tree/main/templates/cosign-container.md)
  * [Deployment: Helm install/upgrade](https://gitlab.com/hegerdes/gitlab-actions/-/tree/main/templates/helm-install.md)
+ * [Deployment: Terraform/ToFu Validate,Plan,Apply](https://gitlab.com/hegerdes/gitlab-actions/-/tree/main/templates/terraform-apply.md)
 
 Currently supported snippets are:
  * debian-core-tools

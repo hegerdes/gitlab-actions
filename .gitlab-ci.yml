@@ -3,6 +3,7 @@
 
 stages:
   - test
+  - validate
   - build
   - package
   - scan
@@ -36,6 +37,9 @@ include:
   - component: $CI_SERVER_HOST/$CI_PROJECT_PATH/container-manifest-merge@$CI_COMMIT_SHA
   - component: $CI_SERVER_HOST/$CI_PROJECT_PATH/trivy-container-scan@$CI_COMMIT_SHA
   - component: $CI_SERVER_HOST/$CI_PROJECT_PATH/cosign-container@$CI_COMMIT_SHA
+  - component: $CI_SERVER_HOST/$CI_PROJECT_PATH/terraform-apply@$CI_COMMIT_SHA
+    inputs:
+      terraform_root: tests/terraform
   - component: $CI_SERVER_HOST/$CI_PROJECT_PATH/helm-package@$CI_COMMIT_SHA
     inputs:
       chart: tests/charts/demo
@@ -55,7 +59,15 @@ include:
 variables:
   GL_K8S_CONTEXT: gitlab-ci
   GL_K8S_AGENT_ID: 1103496
+
 pre-commit:
+  tags: [$RUNNER]
+  parallel:
+    matrix:
+      - RUNNER: saas-linux-small-amd64
+      - RUNNER: saas-linux-small-arm64
+
+.terraform_template:
   tags: [$RUNNER]
   parallel:
     matrix:
@@ -77,6 +89,9 @@ snippets:
         IMAGE: ["debian:trixie-slim", "alpine"]
   script:
     - echo "Running all snippets on ${CI_RUNNER_EXECUTABLE_ARCH}..."
+    - |
+      # System space info
+      df -h / | awk 'NR==2{print "used="$3, "free="$4}'
     - !reference [.snippets, debian-core-tools]
     - !reference [.snippets, alpine-core-tools]
     - !reference [.snippets, openssl-install]
@@ -108,6 +123,9 @@ snippets:
     - !reference [.snippets, aws-cli-install]
     - !reference [.snippets, aws-ssm-install]
     - !reference [.snippets, aws-ecr-credential-helper-install]
+    - |
+      # System space info
+      df -h / | awk 'NR==2{print "used="$3, "free="$4}'
   rules:
     - !reference [.rules, default-branch-only-rules]
     - !reference [.rules, default-merge-rules]

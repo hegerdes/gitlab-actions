@@ -1,0 +1,121 @@
+# Terraform/ToFu-Apply
+
+spec:
+  inputs:
+    job_prefix:
+      type: string
+      default: "TERRAFORM:"
+      description: The name prefix of the jobs that will be included with this component.
+    image:
+      type: string
+      default: registry.gitlab.com/components/opentofu/gitlab-opentofu:latest-opentofulatest-debian
+      description: The container image to use for the job.
+    terraform_root:
+      type: string
+      default: ${CI_PROJECT_DIR}
+      description: The relative path to the root directory of the Terraform project.
+    terraform_environment:
+      type: string
+      default: ${CI_PROJECT_NAME}
+      description: The name of the enviorment. Defaults to the project name but can be DEV, STAGING, or PROD.
+    oidc_audience:
+      type: string
+      default: https://${CI_SERVER_HOST}
+      description: The OIDC audience claim value needed for federated id_token exchange.
+    rules:
+      type: array
+      default:
+        # Schedule pipelines
+        - if: $CI_PIPELINE_SOURCE == "schedule"
+          when: never
+        # Apply jobs: only on tags
+        - if: $CI_JOB_NAME =~ /apply/ && !$CI_COMMIT_TAG
+          when: never # or manual
+        # MR pipelines
+        - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+        # Skip branch pipeline if an MR pipeline exists for this branch
+        - if: $CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS
+          when: never
+        - if: $CI_COMMIT_BRANCH
+        - if: $CI_COMMIT_TAG
+---
+
+.tf_scripts:
+  pipeline-setup:
+    - |
+      # Pipeline info
+      echo "CI_PIPELINE_SOURCE is ${CI_PIPELINE_SOURCE}"
+      echo "Running on ${CI_COMMIT_REF_SLUG}"
+      echo "GITLAB_TOFU_ROOT_DIR: $GITLAB_TOFU_ROOT_DIR"
+      echo "VAR_FILE: $GITLAB_TOFU_VAR_FILES"
+    - |
+      # Setting GitLab CI TF-Module & Plugin auth
+      cat > ~/.terraformrc <<EOF
+      credentials "${CI_SERVER_HOST}" {
+        token = "${CI_JOB_TOKEN}"
+      }
+      EOF
+
+.terraform_template:
+  id_tokens:
+    GITLAB_OIDC_TOKEN:
+      aud: $[[ inputs.oidc_audience ]]
+  variables:
+#   TF_ADDRESS: ${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/terraform/state/${TF_ENV_NAME}
+    GITLAB_TOFU_ROOT_DIR: $[[ inputs.terraform_root ]]
+    TF_IN_AUTOMATION: "true"
+    TF_ROOT: $[[ inputs.terraform_root ]]
+    TF_ENV_NAME: $[[ inputs.terraform_environment ]]
+  image:
+    name: $[[ inputs.image ]]
+  cache:
+    key: "${TF_ROOT}"
+    paths:
+      - ${TF_ROOT}/.terraform/
+  rules: $[[ inputs.rules ]]
+
+$[[ inputs.job_prefix ]]fmt:
+  extends: .terraform_template
+  stage: validate
+  allow_failure: true
+  script:
+    - !reference [.tf_scripts, pipeline-setup]
+    - gitlab-tofu fmt
+
+$[[ inputs.job_prefix ]]validate:
+  extends: .terraform_template
+  stage: validate
+  script:
+    - !reference [.tf_scripts, pipeline-setup]
+    - gitlab-tofu validate
+
+$[[ inputs.job_prefix ]]plan:
+  extends: .terraform_template
+  stage: build
+  script:
+    - !reference [.tf_scripts, pipeline-setup]
+    - gitlab-tofu plan $MY_GITLAB_TOFU_PLAN_EXTRA_ARGS
+    - gitlab-tofu plan-json $MY_GITLAB_TOFU_PLAN_EXTRA_ARGS
+  environment:
+    name: $TF_ENV_NAME
+    action: prepare
+  resource_group: ${TF_ENV_NAME}
+  artifacts:
+    public: false
+    paths:
+      - ${TF_ROOT}/plan.cache
+    reports:
+      terraform: ${TF_ROOT}/plan.json
+
+$[[ inputs.job_prefix ]]apply:
+  extends: .terraform_template
+  stage: deploy
+  script:
+    - !reference [.tf_scripts, pipeline-setup]
+    - gitlab-tofu apply
+  resource_group: ${TF_ENV_NAME}
+  environment:
+    name: $TF_ENV_NAME
+    action: start
+  needs:
+    - "$[[ inputs.job_prefix ]]plan"
