@@ -115,6 +115,7 @@ $[[ inputs.as_job ]]:
     entrypoint: [""]
   services: $[[ inputs.services ]]
   variables:
+    FF_NETWORK_PER_BUILD: "true" # fixes the service probably didn't start properly warning
     BUILDKIT_HOST: tcp://buildkitd:1234
     CONTAINER_BUILD_PUSH: "$[[ inputs.push ]]"
     CONTAINER_BUILD_USE_CACHE: "$[[ inputs.cache ]]"
@@ -191,7 +192,7 @@ $[[ inputs.as_job ]]:
           echo "DOCKERFILE $DOCKERFILE does not exist."
       fi
 
-      echo -e "Build setup:\n$(echo "$CONTAINER_BUILD_IMAGE_TAGS" | sed 's/image /image\n/g' | tr -d ' ')"
+      printf 'Building:\n%s\n' "$(echo "$CONTAINER_BUILD_IMAGE_TAGS" | sed 's/ *--output/\n--output/g; s/^\n//')"
       echo "Using context \"${CONTEXT}\" with dockerfile \"${DOCKERFILE}\""
     - |
       echo "Building image with buildkit..."
