@@ -71,6 +71,7 @@ my-buildkit-build:
 ```
 ### Snippets
 ```yaml
+include:
   - project: hegerdes/gitlab-actions
     file: .gitlab/ci/snippets.yml
   # Or
