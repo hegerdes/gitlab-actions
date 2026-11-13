@@ -1,0 +1,133 @@
+spec:
+  inputs:
+    allow_failure:
+      type: boolean
+      default: false
+      description: If true, pipeline will continue even if the job failed.
+    as_job:
+      type: string
+      default: DOCS:convert
+      description: The name of the job that will be included with this component.
+    stage:
+      type: string
+      default: build
+      description: The stage in which the job should run.
+    image:
+      type: string
+      default: pandoc/extra:latest-debian
+      description: Container image providing pandoc and a LaTeX distribution.
+    input_format:
+      type: string
+      default: markdown
+      description: Format of the source files (case-insensitive). Supported markdown.
+    output_format:
+      type: string
+      default: pdf
+      description: Export format (case-insensitive). Supported pdf, word or html.
+    docs_dir:
+      type: string
+      default: $CI_PROJECT_DIR
+      description: Directory containing the source files to convert (non-recursive).
+    output_dir:
+      type: string
+      default: pdfs
+      description: Output directory for the exported files, relative to $CI_PROJECT_DIR. Exported as job artifact.
+    author:
+      type: string
+      default: $CI_COMMIT_AUTHOR
+      description: Document author metadata.
+    subject:
+      type: string
+      default: Documentation $CI_PROJECT_NAME
+      description: Document subject metadata.
+    extra_args:
+      type: string
+      default: ""
+      description: Additional arguments passed to pandoc.
+    rules:
+      type: array
+      default:
+        # Default branch only
+        - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+---
+$[[ inputs.as_job ]]:
+  stage: $[[ inputs.stage ]]
+  image:
+    name: "$[[ inputs.image ]]"
+    entrypoint: [""]
+  variables:
+    # Convert input to vars so they can be overwritten when extending the job
+    INPUT_FORMAT: "$[[ inputs.input_format ]]"
+    OUTPUT_FORMAT: "$[[ inputs.output_format ]]"
+    DOCS_DIR: "$[[ inputs.docs_dir | expand_vars ]]"
+    OUTPUT_DIR: "$[[ inputs.output_dir ]]"
+    AUTHOR: "$[[ inputs.author ]]"
+    SUBJECT: "$[[ inputs.subject ]]"
+    PANDOC_EXTRA_ARGS: "$[[ inputs.extra_args ]]"
+  script:
+    - echo "Using $(pandoc --version | head -n 1)"
+    - |
+      # Installing addtional fonts
+      tlmgr update --self
+      tlmgr install dejavu
+
+      mkdir -p /templates
+
+    - |
+      INPUT_FORMAT=$(echo "$INPUT_FORMAT" | tr '[:upper:]' '[:lower:]')
+      OUTPUT_FORMAT=$(echo "$OUTPUT_FORMAT" | tr '[:upper:]' '[:lower:]')
+
+      if [ "$INPUT_FORMAT" = "markdown" ]; then
+        INPUT_EXT="md"
+      else
+        echo "Unsupported input format \"$INPUT_FORMAT\". Supported: markdown"
+        exit 1
+      fi
+
+      if [ "$OUTPUT_FORMAT" = "pdf" ]; then
+        OUTPUT_EXT="pdf"
+      elif [ "$OUTPUT_FORMAT" = "word" ]; then
+        OUTPUT_EXT="docx"
+      elif [ "$OUTPUT_FORMAT" = "html" ]; then
+        OUTPUT_EXT="html"
+      else
+        echo "Unsupported output format \"$OUTPUT_FORMAT\". Supported: pdf, word, html"
+        exit 1
+      fi
+
+      mkdir -p "$OUTPUT_DIR"
+
+      # eval so quoted values and $(...) in extra args work
+      if [ -n "$PANDOC_EXTRA_ARGS" ]; then echo "Using extra args=${PANDOC_EXTRA_ARGS}"; fi
+      eval "set -- $PANDOC_EXTRA_ARGS"
+
+      for f in "$DOCS_DIR"/*."$INPUT_EXT"; do
+        # Glob stays literal if nothing matches
+        [ -e "$f" ] || { echo "No .$INPUT_EXT files found in $DOCS_DIR"; exit 1; }
+        name=$(basename "$f" ".$INPUT_EXT")
+        echo "Converting $f to $OUTPUT_DIR/$name.$OUTPUT_EXT"
+        # --standalone so HTML gets a full document including metadata
+        pandoc "$f" -f "$INPUT_FORMAT" -o "$OUTPUT_DIR/$name.$OUTPUT_EXT" \
+          --standalone \
+          --metadata title="$name" \
+          --metadata author="$AUTHOR" \
+          --metadata subject="$SUBJECT" \
+          "$@"
+      done
+
+      echo "Export done!"
+      ls -1 "$OUTPUT_DIR"
+  artifacts:
+    name: "$CI_JOB_NAME"
+    expire_in: 2 weeks
+    paths:
+      - $[[ inputs.output_dir ]]/
+  rules: $[[ inputs.rules ]]
+  allow_failure: $[[ inputs.allow_failure ]]
+  after_script:
+    - |
+      # Sleep on error
+      if [ "$DEBUG_CI" = "true" ] && [ "$CI_JOB_STATUS" = "failed" ]; then
+        echo "CI job has failed, sleeping for 1 hour..."
+        sleep 1h
+      fi
