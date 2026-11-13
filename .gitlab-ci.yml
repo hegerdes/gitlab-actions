@@ -203,6 +203,13 @@ HELM:package:
       - RUNNER: saas-linux-small-amd64
       - RUNNER: saas-linux-small-arm64
 
+DOCS:pdf-export:
+  tags: [$RUNNER]
+  parallel:
+    matrix:
+      - RUNNER: saas-linux-small-amd64
+      - RUNNER: saas-linux-small-arm64
+
 HELM:install:
   tags: [$RUNNER]
   services:

@@ -6,6 +6,7 @@ This repo contains a collection of different [GitLab CI/CD Components](https://a
 
 Currently supported components are:
  * [Code Quality: pre-commit](https://gitlab.com/hegerdes/gitlab-actions/-/tree/main/templates/pre-commit.md)
+ * [DOCS: Pandoc Converter](https://gitlab.com/hegerdes/gitlab-actions/-/tree/main/templates/pandoc.md)
  * [Build: Helm package](https://gitlab.com/hegerdes/gitlab-actions/-/tree/main/templates/helm-package.md)
  * [Build: Terraform/ToFu Module](https://gitlab.com/hegerdes/gitlab-actions/-/tree/main/templates/terraform-module.md)
  * [Container Build: Buildkit](https://gitlab.com/hegerdes/gitlab-actions/-/tree/main/templates/buildkit-build.md)
