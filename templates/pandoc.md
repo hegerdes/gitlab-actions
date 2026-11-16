@@ -89,20 +89,21 @@ DOCS:convert:
 
 ## Inputs
 
-| Input           | Default                          | Description                                                 |
-| --------------- | -------------------------------- | ----------------------------------------------------------- |
-| `allow_failure` | `false`                          | Continue the pipeline if the job fails.                     |
-| `as_job`        | `DOCS:convert`                   | Name of the job.                                            |
-| `stage`         | `build`                          | Stage of the job.                                           |
-| `image`         | `pandoc/extra:latest-debian`     | Image providing pandoc and LaTeX.                           |
-| `input_format`  | `markdown`                       | Source format, see [Supported formats](#supported-formats). |
-| `output_format` | `pdf`                            | Export format, see [Supported formats](#supported-formats). |
-| `docs_dir`      | `$CI_PROJECT_DIR`                | Directory with the source files.                            |
-| `output_dir`    | `pdfs`                           | Output directory, exported as artifact.                     |
-| `author`        | `$CI_COMMIT_AUTHOR`              | Document author metadata.                                   |
-| `subject`       | `Documentation $CI_PROJECT_NAME` | Document subject metadata.                                  |
-| `extra_args`    | `""`                             | Additional pandoc arguments.                                |
-| `rules`         | default branch only              | Job rules.                                                  |
+| Input            | Default                          | Description                                                 |
+| ---------------- | -------------------------------- | ----------------------------------------------------------- |
+| `allow_failure`  | `false`                          | Continue the pipeline if the job fails.                     |
+| `as_job`         | `DOCS:convert`                   | Name of the job.                                            |
+| `stage`          | `build`                          | Stage of the job.                                           |
+| `image`          | `pandoc/extra:latest-debian`     | Image providing pandoc and LaTeX.                           |
+| `input_format`   | `markdown`                       | Source format, see [Supported formats](#supported-formats). |
+| `output_format`  | `pdf`                            | Export format, see [Supported formats](#supported-formats). |
+| `docs_dir`       | `$CI_PROJECT_DIR`                | Directory with the source files.                            |
+| `output_dir`     | `pdfs`                           | Output directory, exported as artifact.                     |
+| `author`         | `$CI_COMMIT_AUTHOR`              | Document author metadata.                                   |
+| `subject`        | `Documentation $CI_PROJECT_NAME` | Document subject metadata.                                  |
+| `extra_args`     | `""`                             | Additional pandoc arguments.                                |
+| `extra_template` | `See pandoc.yml`                 | File content written to /templates/pandoc-job-template.tex. |
+| `rules`          | default branch only              | Job rules.                                                  |
 
 ## Fixed job settings
 

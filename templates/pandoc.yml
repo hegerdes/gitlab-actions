@@ -44,6 +44,56 @@ spec:
       type: string
       default: ""
       description: Additional arguments passed to pandoc.
+    extra_template:
+      type: string
+      description: File content written to /templates/pandoc-job-template.tex.
+      default: |
+        % Source - https://tex.stackexchange.com/a/179956
+        % Posted by JLDiaz, modified by community. See post 'Timeline" for change history
+        % Retrieved 2026-06-02, License - CC BY-SA 3.0
+
+        % Contents of listings-setup.tex
+        \usepackage{xcolor}
+        \usepackage {fontspec}
+        % Emoji handling
+        \newfontfamily\emoji{Noto Color Emoji}[
+        Path=/usr/share/fonts/truetype/noto/,
+        UprightFont=NotoColorEmoji.ttf,
+        Renderer=Harfbuzz
+        ]
+
+        % Set emoji fallback
+        \directlua{
+        luaotfload.add_fallback("emojifallback", {
+        "Noto Color Emoji:mode=harf"
+        })
+        }
+        % Main font with fallback
+        \setmainfont{DejaVu Serif}[RawFeature={fallback=emojifallback}]
+
+        \lstset{
+        basicstyle=\ttfamily,
+        numbers=left,
+        keywordstyle=\color[rgb]{0.13,0.29,0.53}\bfseries,
+        stringstyle=\color[rgb]{0.31,0.60,0.02},
+        commentstyle=\color[rgb]{0.56,0.35,0.01}\itshape,
+        numberstyle=\footnotesize,
+        stepnumber=1,
+        numbersep=5pt,
+        backgroundcolor=\color[RGB]{248,248,248},
+        showspaces=false,
+        showstringspaces=false,
+        showtabs=false,
+        tabsize=2,
+        captionpos=b,
+        breaklines=true,
+        breakatwhitespace=true,
+        breakautoindent=true,
+        escapeinside={\%*}{*)},
+        linewidth=\textwidth,
+        basewidth=0.5em,
+        }
+
     rules:
       type: array
       default:
@@ -64,6 +114,7 @@ $[[ inputs.as_job ]]:
     AUTHOR: "$[[ inputs.author ]]"
     SUBJECT: "$[[ inputs.subject ]]"
     PANDOC_EXTRA_ARGS: "$[[ inputs.extra_args ]]"
+    PANDOC_EXTRA_TEMPLATE: "$[[ inputs.extra_template ]]"
   script:
     - echo "Using $(pandoc --version | head -n 1)"
     - |
@@ -72,6 +123,7 @@ $[[ inputs.as_job ]]:
       tlmgr install dejavu
 
       mkdir -p /templates
+      echo "{PANDOC_EXTRA_TEMPLATE}" > /templates/pandoc-job-template.tex
 
     - |
       INPUT_FORMAT=$(echo "$INPUT_FORMAT" | tr '[:upper:]' '[:lower:]')
